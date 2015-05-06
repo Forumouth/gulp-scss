@@ -8,5 +8,5 @@ node_js:
 before_install:
   - "gem install bundler"
 
-after_install:
+before_script:
   - "bundle install --path=./vendor/bundle"
