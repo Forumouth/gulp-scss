@@ -4,3 +4,9 @@ node_js:
   - "0.11"
   - "0.10"
   - "iojs"
+
+before_install:
+  - "gem install bundler"
+
+after_install:
+  - "bundle install --path=./vendor/bundle"
