@@ -3,6 +3,7 @@ lint = require "gulp-coffeelint"
 plumber = require "gulp-plumber"
 notify = require "gulp-notify"
 mocha = require "gulp-mocha"
+coffee = require "gulp-coffee"
 
 g.task "gulpfile-check", ->
   g.src(
@@ -32,9 +33,12 @@ g.task "test", ->
     mocha("reporter": "dot")
   )
 
+g.task "compile", ["test"], ->
+  g.src("src/**/*.coffee").pipe(coffee()).pipe(g.dest("./lib"))
+
 g.task "default", ->
   g.watch "gulpfile.coffee", ["gulpfile-check"]
   g.watch [
     "tests/**/*.coffee"
     "src/**/*.coffee"
-  ], ["test"]
+  ], ["compile"]
