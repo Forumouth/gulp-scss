@@ -16,7 +16,7 @@ This is a plugin for SCSS (aka. SASS) compiler by standard approach
 # How can I use?
 It's also just simple
 
-```gulpfile.js```
+`gulpfile.js`
 
 ```JavaScript
 /*global require*/
