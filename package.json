@@ -21,9 +21,6 @@
     "url": "https://github.com/forumouth/gulp-scss/issues"
   },
   "homepage": "https://github.com/forumouth/gulp-scss#readme",
-  "dependencies": {
-    "node-kissdi": "^1.0.2"
-  },
   "devDependencies": {
     "chai": "^2.3.0",
     "coffee-script": "^1.9.2",
@@ -39,6 +36,7 @@
     "q": "^1.3.0"
   },
   "dependencies": {
+    "node-kissdi": "^1.0.3",
     "through2": "^0.6.5"
   }
 }
