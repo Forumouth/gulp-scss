@@ -33,3 +33,14 @@ It's also just simple
     });
 }(require));
 ```
+
+## Options
+You can specify options by passing it as a parameter object of `scss` function,
+as you can see above. In particular, `scss` function has a parameter named options:
+`scss(options)`
+
+When options are falsy, normal options are used.
+
+### options.bundleExec (boolean, default: false)
+When this option is true, `bundle exec scss` is used instead of `scss`. Otherwise,
+`scss` is used instead of `bundle exec scss`
