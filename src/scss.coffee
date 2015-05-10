@@ -9,7 +9,7 @@ compile = inject [
     (options) ->
       (file, enc, cb) ->
         if file.isNull()
-          cb null, file
+          return cb null, file
         file.path = gutil.replaceExtension file.path, ".css"
         command = []
         if options
@@ -19,7 +19,7 @@ compile = inject [
         proc = spawn command.splice(0, 1)[0], command
         file.pipe proc.stdin, "end": true
         file.contents = proc.stdout
-        cb null, file
+        return cb null, file
 ], "spawn": require("child_process").spawn
 
 module.exports = (options) -> through.obj compile.invoke()(options)

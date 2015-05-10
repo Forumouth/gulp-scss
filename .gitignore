@@ -33,3 +33,4 @@ xcuserdata
 vendor
 Gemfile.lock
 .bundle
+.gulp-scss-cache

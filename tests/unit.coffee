@@ -23,9 +23,9 @@ describe "SCSS unit test", ->
     cb = sinon.spy()
     func_scss = scss.__compile__.invoke(objectToInject)
     file =
-      "isNull": sinon.stub.returns(false)
-      "isBuffer": sinon.stub.returns(true)
-      "isStream": sinon.stub.returns(false)
+      "isNull": sinon.stub().returns(false)
+      "isBuffer": sinon.stub().returns(true)
+      "isStream": sinon.stub().returns(false)
       "pipe": sinon.spy()
       "path": "tests/data/source.scss"
 
