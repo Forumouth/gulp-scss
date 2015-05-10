@@ -1,10 +1,12 @@
 expect = require("chai").expect
 sinon = require "sinon"
+through2 = require "through2"
 
 describe "SCSS unit test", ->
   objectToInject = undefined
   scss = undefined
   file = undefined
+  fs = undefined
   func_scss = undefined
   cb = undefined
   ioMap = undefined
@@ -18,14 +20,19 @@ describe "SCSS unit test", ->
       "stdin": 0
       "stdout": 1
       "stderr": 2
+    dest = sinon.spy()
     objectToInject =
       "spawn": sinon.stub().returns ioMap
+      "vfs":
+        "dest": sinon.stub().returns through2.obj (file, enc, cb) ->
+          cb null, file
     cb = sinon.spy()
-    func_scss = scss.__compile__.invoke(objectToInject)
+    func_scss = scss.__compile__.invoke objectToInject
     file =
-      "isNull": sinon.stub().returns(false)
-      "isBuffer": sinon.stub().returns(true)
-      "isStream": sinon.stub().returns(false)
+      "clone": sinon.stub().returns file
+      "isNull": sinon.stub().returns false
+      "isBuffer": sinon.stub().returns true
+      "isStream": sinon.stub().returns false
       "pipe": sinon.spy()
       "path": "tests/data/source.scss"
 
@@ -56,6 +63,7 @@ describe "SCSS unit test", ->
           objectToInject.spawn.calledWithExactly "bundle", [
             "exec"
             "scss"
+            "--sourcemap=auto"
           ]
         ).is.ok
 
@@ -78,7 +86,7 @@ describe "SCSS unit test", ->
 
       it "spawn function should be called with scss", ->
         expect(
-          objectToInject.spawn.calledWithExactly "scss", []
+          objectToInject.spawn.calledWithExactly "scss", ["--sourcemap=auto"]
         ).is.ok
 
       it "file should be piped to the stdin", ->
@@ -92,6 +100,14 @@ describe "SCSS unit test", ->
       it "Path should have css extension", ->
         expect(file.path).is.equal "tests/data/source.css"
 
+    describe "When path is specified", ->
+      func = undefined
+      beforeEach ->
+        func = func_scss "tmpPath": "test"
+        func file, undefined, cb
+      it "vfs.dest should be called with \"test\"", ->
+        expect(objectToInject.vfs.dest.calledWith "test").is.ok
+
   describe "Without any options", ->
     func = undefined
     beforeEach ->
@@ -100,7 +116,7 @@ describe "SCSS unit test", ->
 
     it "spawn function should be called with scss", ->
       expect(
-        objectToInject.spawn.calledWithExactly "scss", []
+        objectToInject.spawn.calledWithExactly "scss", ["--sourcemap=auto"]
       ).is.ok
 
     it "file should be piped to the stdin", ->
