@@ -30,7 +30,10 @@ g.task "test", ->
   ).pipe(
     lint.reporter("failOnWarning")
   ).pipe(
-    mocha("reporter": "dot")
+    mocha(
+      "reporter": "dot"
+      "timeout": 2000
+    )
   )
 
 g.task "compile", ["test"], ->

@@ -1,6 +1,8 @@
 expect = require("chai").expect
 sinon = require "sinon"
 through2 = require "through2"
+path = require "path"
+deepcopy = require "deepcopy"
 
 describe "SCSS unit test", ->
   objectToInject = undefined
@@ -11,124 +13,154 @@ describe "SCSS unit test", ->
   cb = undefined
   ioMap = undefined
 
-  before ->
+  beforeEach ->
     process.env.testing = true
     scss = require "../src/scss.coffee"
 
-  beforeEach ->
-    ioMap =
-      "stdin": 0
-      "stdout": 1
-      "stderr": 2
     dest = sinon.spy()
-    objectToInject =
-      "spawn": sinon.stub().returns ioMap
-      "vfs":
-        "dest": sinon.stub().returns through2.obj (file, enc, cb) ->
-          cb null, file
     cb = sinon.spy()
-    func_scss = scss.__compile__.invoke objectToInject
+
     file =
-      "clone": sinon.stub().returns file
+      "clone": sinon.stub().returns deepcopy file
       "isNull": sinon.stub().returns false
       "isBuffer": sinon.stub().returns true
       "isStream": sinon.stub().returns false
       "pipe": sinon.spy()
-      "path": "tests/data/source.scss"
+      "path": "/tests/data/source.scss"
+      "contents": new Buffer("Hello World")
+      "relative": "source.scss"
 
-  after ->
+    objectToInject =
+      "exec": sinon.stub().returns "on": (event, callback) ->
+        if event is "close"
+          callback()
+      "fs":
+        "createWriteStream": sinon.stub().returns(
+          "on": (event, callback) ->
+            if event is "finish"
+              callback()
+        )
+        "readFileSync": (path) -> file.contents
+      "mkdirp": sinon.stub().callsArg 1
+    func_scss = scss.__compile__.invoke objectToInject
+
+  afterEach ->
     delete process.env.testing
     delete require.cache[require.resolve "../src/scss.coffee"]
-
-  it "Compile function should be an injectable function", ->
-    expect(scss.__compile__.invoke).is.a "function"
 
   describe "Null File", ->
     beforeEach ->
       file.isNull = sinon.stub().returns(true)
       file.isBuffer = sinon.stub().returns(false)
-    it "cb should returns as it is", ->
+    it "cb should be called", ->
       func_scss()(file, undefined, cb)
       expect(cb.calledWith null, file).is.ok
 
+  describe "Non Null File", ->
+    beforeEach ->
+      file.isNull = sinon.stub().returns(false)
+    it "cb should returns as it is", (done) ->
+      func_scss()(file, undefined, cb).then(
+        ->
+          expect(cb.calledWith null, file).is.ok
+      ).done (-> done()), done
+
   describe "When options are passed", ->
     describe "When bundleExec is true", ->
-      func = undefined
-      beforeEach ->
-        func = func_scss "bundleExec": true
-        func file, undefined, cb
+      func_promise = undefined
+      beforeEach (done) ->
+        func_promise = func_scss(
+          "bundleExec": true
+        )(file, undefined, -> done())
 
-      it "spawn function should be called with bundle exec scss", ->
-        expect(
-          objectToInject.spawn.calledWithExactly "bundle", [
-            "exec"
-            "scss"
-            "--sourcemap=auto"
-          ]
-        ).is.ok
+      it "exec function should be called with bundle exec scss", (done) ->
+        func_promise.then(
+          ->
+            expect(
+              objectToInject.exec.calledWithExactly [
+                "bundle"
+                "exec"
+                "scss"
+                "--sourcemap=auto"
+                ".gulp-scss-cache/source.scss"
+                ".gulp-scss-cache/source.css"
+              ].join " "
+            ).is.ok
+            done()
+        ).catch done
 
-      it "file should be piped to the stdin", ->
-        expect(
-          file.pipe.calledWithExactly ioMap.stdin, "end": true
-        ).is.ok
-
-      it "Callback should be called with file object", ->
-        expect(cb.calledWith null, file).is.ok
-
-      it "Path should have css extension", ->
-        expect(file.path).is.equal "tests/data/source.css"
+      it("file path should be replaced with .gulp-scss-cache/source.css",
+          (done) ->
+            func_promise.then(
+              -> expect(file.path).equal ".gulp-scss-cache/source.css"
+            ).done (-> done()), done
+        )
 
     describe "When bundleExec is false", ->
-      func = undefined
-      beforeEach ->
-        func = func_scss "bundleExec": false
-        func file, undefined, cb
+      func_promise = undefined
+      beforeEach (done) ->
+        func_promise = func_scss(
+          "bundleExec": false
+        )(file, undefined, (-> done()))
 
-      it "spawn function should be called with scss", ->
-        expect(
-          objectToInject.spawn.calledWithExactly "scss", ["--sourcemap=auto"]
-        ).is.ok
-
-      it "file should be piped to the stdin", ->
-        expect(
-          file.pipe.calledWithExactly ioMap.stdin, "end": true
-        ).is.ok
-
-      it "Callback should be called with file object", ->
-        expect(cb.calledWith null, file).is.ok
+      it "exec function should be called with scss", (done) ->
+        func_promise.then(
+          ->
+            expect(
+              objectToInject.exec.calledWithExactly [
+                "scss"
+                "--sourcemap=auto"
+                ".gulp-scss-cache/source.scss"
+                ".gulp-scss-cache/source.css"
+              ].join " "
+            ).is.ok
+        ).done (-> done()), done
 
       it "Path should have css extension", ->
-        expect(file.path).is.equal "tests/data/source.css"
+        expect(file.path).is.equal ".gulp-scss-cache/source.css"
 
     describe "When path is specified", ->
-      func = undefined
-      beforeEach ->
-        func = func_scss "tmpPath": "test"
-        func file, undefined, cb
-      it "vfs.dest should be called with \"test\"", ->
-        expect(objectToInject.vfs.dest.calledWith "test").is.ok
+      func_promise = undefined
+      beforeEach (done) ->
+        func_promise = func_scss(
+          "tmpPath": "test"
+        )(file, undefined, (-> done()))
+
+      it "Dir named \"test\" should be created", (done) ->
+        func_promise.then(
+          -> expect(objectToInject.mkdirp.calledWith "test").is.ok
+        ).done (-> done()), done
+
+      it "writeFile should be called with \"test/test.scss\"", (done) ->
+        func_promise.then(
+          ->
+            expect(
+              objectToInject.fs.createWriteStream.calledWith(
+                path.join "test", file.relative
+              )
+            ).is.ok
+        ).done (-> done()), done
 
   describe "Without any options", ->
-    func = undefined
-    beforeEach ->
-      func = func_scss()
-      func file, undefined, cb
+    func_promise = undefined
+    beforeEach (done) ->
+      func_promise = func_scss()(file, undefined, (-> done()))
 
-    it "spawn function should be called with scss", ->
-      expect(
-        objectToInject.spawn.calledWithExactly "scss", ["--sourcemap=auto"]
-      ).is.ok
-
-    it "file should be piped to the stdin", ->
-      expect(
-        file.pipe.calledWithExactly ioMap.stdin, "end": true
-      ).is.ok
-
-    it "Callback should be called with file object", ->
-      expect(cb.calledWithExactly null, file).is.ok
+    it "exec function should be called with scss", (done) ->
+      func_promise.then(
+        ->
+          expect(
+            objectToInject.exec.calledWithExactly [
+              "scss"
+              "--sourcemap=auto"
+              ".gulp-scss-cache/source.scss"
+              ".gulp-scss-cache/source.css"
+            ].join " "
+          ).is.ok
+      ).done (-> done()), done
 
     it "Path should have css extension", ->
-      expect(file.path).is.equal "tests/data/source.css"
+      expect(file.path).is.equal ".gulp-scss-cache/source.css"
 
 
 describe "For non-testing mode", ->
