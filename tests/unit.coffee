@@ -141,6 +141,25 @@ describe "SCSS unit test", ->
             ).is.ok
         ).done (-> done()), done
 
+    describe "When sourcemap has special options", ->
+      for smvalue in ["auto", "file", "inline", "none"]
+        do (smvalue) ->
+          describe "Case: #{smvalue}", ->
+            func_promise = undefined
+            beforeEach (done)->
+              func_promise = func_scss(
+                "sourcemap": smvalue
+              )(file, undefined, (-> done()))
+            it "exec function should be called with sourcemap", (done) ->
+              func_promise.then(
+                -> expect(objectToInject.exec.calledWithExactly([
+                    "scss"
+                    "--sourcemap=#{smvalue}"
+                    ".gulp-scss-cache/source.scss"
+                    ".gulp-scss-cache/source.css"
+                  ].join " ")).is.ok
+              ).done (-> done()), done
+
   describe "Without any options", ->
     func_promise = undefined
     beforeEach (done) ->

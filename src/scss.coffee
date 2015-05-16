@@ -6,6 +6,7 @@ path = require "path"
 q = require "q"
 mapConverter = require "convert-source-map"
 testing = process.env.testing
+applySourceMap = require "vinyl-sourcemaps-apply"
 
 compile = inject [
   "exec"
@@ -68,6 +69,8 @@ compile = inject [
             sourcemap = mapConverter.fromMapFileSource(
               contents, options.tmpPath
             )
+            if sourcemap
+              applySourceMap file, sourcemap.sourcemap
             file.contents = new Buffer(
               mapConverter.removeMapFileComments(contents).trim()
             )

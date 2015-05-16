@@ -5,12 +5,15 @@ g = require "gulp"
 t = require "through2"
 
 describe "SCSS integration tests", ->
-  right = undefined
+  right = {}
   scss = require "../src/scss"
   before ->
-    right = fs.readFileSync(
+    right.file = fs.readFileSync(
       "./tests/data/correct.css"
     ).toString("utf-8").trim()
+    right.sourcemap = JSON.parse(fs.readFileSync(
+      "./tests/data/correct.css.map"
+    ).toString("utf-8").trim())
   after ->
     delete require.cache[require.resolve "../src/scss.coffee"]
 
@@ -29,5 +32,6 @@ describe "SCSS integration tests", ->
 
     compilationDefer.promise.then(
       (file) ->
-        expect(file.contents.toString("utf-8")).is.equal right
+        expect(file.contents.toString("utf-8")).is.equal right.file
+        expect(file.sourceMap).is.eql right.sourcemap
     ).catch((e) -> throw e).done (-> done()), done

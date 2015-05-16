@@ -41,6 +41,7 @@
     "merge": "^1.2.0",
     "mkdirp": "^0.5.0",
     "node-kissdi": "^1.0.3",
-    "through2": "^0.6.5"
+    "through2": "^0.6.5",
+    "vinyl-sourcemaps-apply": "^0.1.4"
   }
 }
