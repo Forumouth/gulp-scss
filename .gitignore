@@ -1,6 +1,4 @@
 node_modules
-*.map
-*.map.*
 .sass-cache
 .sassc
 .scssc
