@@ -3,6 +3,7 @@ sinon = require "sinon"
 through2 = require "through2"
 path = require "path"
 deepcopy = require "deepcopy"
+guitl = require "gulp-util"
 
 describe "SCSS unit test", ->
   objectToInject = undefined
@@ -27,6 +28,8 @@ describe "SCSS unit test", ->
       "isStream": sinon.stub().returns false
       "pipe": sinon.spy()
       "path": "/tests/data/source.scss"
+      "cwd": "/"
+      "base": "/tests/data"
       "contents": new Buffer("Hello World")
       "relative": "source.scss"
 
@@ -82,8 +85,18 @@ describe "SCSS unit test", ->
                 "exec"
                 "scss"
                 "--sourcemap=auto"
-                ".gulp-scss-cache/source.scss"
-                ".gulp-scss-cache/source.css"
+                path.join(
+                  file.cwd,
+                  ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  "source.scss"
+                )
+                path.join(
+                  file.cwd,
+                  ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  "source.css"
+                )
               ].join " "
             ).is.ok
             done()
@@ -92,7 +105,7 @@ describe "SCSS unit test", ->
       it("file path should be replaced with .gulp-scss-cache/source.css",
           (done) ->
             func_promise.then(
-              -> expect(file.path).equal ".gulp-scss-cache/source.css"
+              -> expect(file.path).equal "/tests/data/source.css"
             ).done (-> done()), done
         )
 
@@ -110,14 +123,24 @@ describe "SCSS unit test", ->
               objectToInject.exec.calledWithExactly [
                 "scss"
                 "--sourcemap=auto"
-                ".gulp-scss-cache/source.scss"
-                ".gulp-scss-cache/source.css"
+                path.join(
+                  file.cwd,
+                  ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  "source.scss"
+                )
+                path.join(
+                  file.cwd,
+                  ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  "source.css"
+                )
               ].join " "
             ).is.ok
         ).done (-> done()), done
 
       it "Path should have css extension", ->
-        expect(file.path).is.equal ".gulp-scss-cache/source.css"
+        expect(file.path).is.equal "/tests/data/source.css"
 
     describe "When path is specified", ->
       func_promise = undefined
@@ -128,16 +151,23 @@ describe "SCSS unit test", ->
 
       it "Dir named \"test\" should be created", (done) ->
         func_promise.then(
-          -> expect(objectToInject.mkdirp.calledWith "test").is.ok
+          -> expect(objectToInject.mkdirp.calledWith path.join(
+            file.cwd,
+            "test",
+            path.relative(file.cwd, file.base)
+          )).is.ok
         ).done (-> done()), done
 
       it "writeFile should be called with \"test/test.scss\"", (done) ->
         func_promise.then(
           ->
             expect(
-              objectToInject.fs.createWriteStream.calledWith(
-                path.join "test", file.relative
-              )
+              objectToInject.fs.createWriteStream.calledWith(path.join(
+                file.cwd,
+                "test",
+                path.relative(file.cwd, file.base),
+                file.relative
+              ))
             ).is.ok
         ).done (-> done()), done
 
@@ -155,8 +185,18 @@ describe "SCSS unit test", ->
                 -> expect(objectToInject.exec.calledWithExactly([
                     "scss"
                     "--sourcemap=#{smvalue}"
-                    ".gulp-scss-cache/source.scss"
-                    ".gulp-scss-cache/source.css"
+                    path.join(
+                      file.cwd,
+                      ".gulp-scss-cache",
+                      path.relative(file.cwd, file.base),
+                      "source.scss"
+                    )
+                    path.join(
+                      file.cwd,
+                      ".gulp-scss-cache",
+                      path.relative(file.cwd, file.base),
+                      "source.css"
+                    )
                   ].join " ")).is.ok
               ).done (-> done()), done
 
@@ -172,14 +212,24 @@ describe "SCSS unit test", ->
             objectToInject.exec.calledWithExactly [
               "scss"
               "--sourcemap=auto"
-              ".gulp-scss-cache/source.scss"
-              ".gulp-scss-cache/source.css"
+              path.join(
+                file.cwd,
+                ".gulp-scss-cache",
+                path.relative(file.cwd, file.base),
+                "source.scss"
+              )
+              path.join(
+                file.cwd,
+                ".gulp-scss-cache",
+                path.relative(file.cwd, file.base),
+                "source.css"
+              )
             ].join " "
           ).is.ok
       ).done (-> done()), done
 
     it "Path should have css extension", ->
-      expect(file.path).is.equal ".gulp-scss-cache/source.css"
+      expect(file.path).is.equal "/tests/data/source.css"
 
 
 describe "For non-testing mode", ->

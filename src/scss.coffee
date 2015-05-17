@@ -22,14 +22,20 @@ compile = inject [
           "sourcemap": "auto"
           "tmpPath": ".gulp-scss-cache"
         merge(options, opts)
+        tmpDir = path.join(
+          file.cwd,
+          options.tmpPath,
+          path.relative(file.cwd, file.base),
+          path.dirname(file.relative)
+        )
 
         compilerPromise = q.defer()
-        q.nfcall(mkdirp, options.tmpPath).then(
+        q.nfcall(mkdirp, tmpDir).then(
           ->
             defer = q.defer()
             tmp = file.clone()
             tmpWriteStream = fs.createWriteStream(
-              path.join options.tmpPath, tmp.relative
+              path.join tmpDir, tmp.relative
             )
             tmpWriteStream.on "finish", defer.resolve
             tmpWriteStream.on "error", defer.reject
@@ -42,17 +48,11 @@ compile = inject [
             if options.bundleExec
               command = command.concat "bundle", "exec"
             command.push "scss"
-            command = command.concat(
-              "--sourcemap=#{options.sourcemap}",
-              path.join(
-                options.tmpPath,
-                file.relative
-              ),
-              path.join(
-                options.tmpPath,
-                gutil.replaceExtension file.relative, ".css"
-              )
-            )
+            command = command.concat([
+              "--sourcemap=#{options.sourcemap}"
+              path.join tmpDir, file.relative
+              path.join tmpDir, gutil.replaceExtension file.relative, ".css"
+            ])
 
             proc = exec command.join(" ")
             proc.on "error", defer.reject
@@ -60,15 +60,14 @@ compile = inject [
             return defer.promise
         ).then(
           ->
-            file.path = path.join(
-              options.tmpPath, gutil.replaceExtension file.relative, ".css"
-            )
+            file.path = gutil.replaceExtension file.path, ".css"
             # I want to pass readable stream, but I don't.
             # Why? Almost all gulp plugins don't support stream!
-            contents = fs.readFileSync(file.path).toString("utf-8")
-            sourcemap = mapConverter.fromMapFileSource(
-              contents, options.tmpPath
-            )
+            contents = fs.readFileSync(
+               path.join tmpDir, gutil.replaceExtension file.relative, ".css"
+            ).toString("utf-8")
+            sourcemap = mapConverter.fromMapFileSource contents, tmpDir
+
             if sourcemap
               applySourceMap file, sourcemap.sourcemap
             file.contents = new Buffer(
