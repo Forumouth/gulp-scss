@@ -44,3 +44,11 @@ When options are falsy, normal options are used.
 ### options.bundleExec (boolean, default: false)
 When this option is true, `bundle exec scss` is used instead of `scss`. Otherwise,
 `scss` is used instead of `bundle exec scss`
+
+### options.tmpPath (string, default: `.gulp-scss-cache`)
+Specifies temporary path to store the compiled files.
+Note that you should specify the path as relative path
+
+### options.sourcemap (string, default: `auto`)
+Specifies what type of sourcemap to generate.
+This option is equivalent to `--sourcemap=TYPE` option of scss.
