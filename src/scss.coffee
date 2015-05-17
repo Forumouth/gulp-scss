@@ -35,7 +35,7 @@ compile = inject [
             defer = q.defer()
             tmp = file.clone()
             tmpWriteStream = fs.createWriteStream(
-              path.join tmpDir, tmp.relative
+              path.join tmpDir, path.basename tmp.relative
             )
             tmpWriteStream.on "finish", defer.resolve
             tmpWriteStream.on "error", defer.reject
@@ -50,8 +50,11 @@ compile = inject [
             command.push "scss"
             command = command.concat([
               "--sourcemap=#{options.sourcemap}"
-              path.join tmpDir, file.relative
-              path.join tmpDir, gutil.replaceExtension file.relative, ".css"
+              path.join tmpDir, path.basename file.relative
+              path.join(
+                tmpDir,
+                gutil.replaceExtension(path.basename(file.relative), ".css")
+              )
             ])
 
             proc = exec command.join(" ")
@@ -64,7 +67,10 @@ compile = inject [
             # I want to pass readable stream, but I don't.
             # Why? Almost all gulp plugins don't support stream!
             contents = fs.readFileSync(
-               path.join tmpDir, gutil.replaceExtension file.relative, ".css"
+               path.join(
+                tmpDir,
+                gutil.replaceExtension(path.basename(file.relative), ".css")
+              )
             ).toString("utf-8")
             sourcemap = mapConverter.fromMapFileSource contents, tmpDir
 
@@ -82,6 +88,7 @@ compile = inject [
               "Compilation failed.: #{e}\nStack Trace:\n#{e.stack}"
             )
             compilerPromise.reject error
+            cb error
             throw error
         )
         return compilerPromise.promise

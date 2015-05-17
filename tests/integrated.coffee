@@ -72,43 +72,29 @@ describe "SCSS integration tests", ->
       "test2.css"
       "test3.css"
     ]
-    beforeEach (done) ->
-      promises = [
-        q.all((
-          q.nfcall(
-            fs.readFile,
-            pathJoin "tests/data/multiple", file
-          ) for file in targetFiles
-        )).then (results) ->
-          results.forEach (result, index) ->
-            if not right[pathJoin(
-                "tests/results/multiple",
-                targetFiles[index]
-              )]
-              right[pathJoin "tests/results/multiple", targetFiles[index]] = {}
-            right[pathJoin(
-              "tests/results/multiple",
-              targetFiles[index]
-            )].content = result.toString("utf-8").trim()
-        q.all(
-          (
-              q.nfcall(
-                fs.readFile,
-                pathJoin("tests/data/multiple/#{file}.map")
-              ) for file in targetFiles
-          )
-        ).then (results) ->
-          results.forEach (result, index) ->
-            if not right[pathJoin(
-                "tests/results/multiple",
-                targetFiles[index]
-              )]
-              right[pathJoin "tests/results/multiple", targetFiles[index]] = {}
-            right[pathJoin(
-              "tests/results/multiple",
-              targetFiles[index]
-            )].map = JSON.parse result
-      ]
+    before (done) ->
+      promises = []
+      targetFiles.forEach (file) ->
+        promises.push q.nfcall(
+          fs.readFile,
+          pathJoin("./tests/data/multiple", file)
+        ).then(
+          (data) ->
+            resultPath = pathJoin("./tests/results/multiple", file)
+            if not right[resultPath]
+              right[resultPath] = {}
+            right[resultPath].content = data.toString("utf-8").trim()
+        )
+        promises.push q.nfcall(
+          fs.readFile,
+          pathJoin("./tests/data/multiple", file + ".map")
+        ).then(
+          (data) ->
+            resultPath = pathJoin("./tests/results/multiple", file)
+            if not right[resultPath]
+              right[resultPath] = {}
+            right[resultPath].map = JSON.parse data.toString("utf-8")
+        )
       q.all(promises).done (-> done()), done
 
     it "The files should be compiled properly", (done) ->
@@ -126,34 +112,98 @@ describe "SCSS integration tests", ->
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
         g.dest("./tests/results/multiple")
-      ).once("end", defer.resolve).once("error", defer.reject)
+      ).on("end", defer.resolve).once("error", defer.reject)
 
       defer.promise.then(
         ->
-          files = (pathJoin(
-            "./tests/results/multiple",
-            gutil.replaceExtension(file, ".css")
-          ) for file in targetFiles)
+          files = (
+            pathJoin("./tests/results/multiple", file) for file in targetFiles
+          )
 
-          filePromises = []
-          mapPromises = []
-          files.forEach (file) -> filePromises.push q.nfcall(
-            fs.readFile, file
-          ).then(
-            (data) ->
-              expect(data.toString("utf-8").trim()).equal(
-                right[file].content
-              )
-          )
-          files.forEach (file) -> mapPromises.push q.nfcall(
-            fs.readFile, file + ".map"
-          ).then(
-            (data) ->
-              expect(JSON.parse data).eql(
-                right[file].map
-              )
-          )
-          q.all(
-            filePromises.concat mapPromises
-          ).catch((e) -> throw e).done (-> done()), done
+          promises = []
+          files.forEach (file) ->
+            promises.push q.nfcall(
+              fs.readFile, file
+            ).then(
+              (data) ->
+                expect(
+                  data.toString("utf-8").trim()
+                ).equal(
+                  right[file].content
+                )
+            )
+            promises.push q.nfcall(
+              fs.readFile, file + ".map"
+            ).then(
+              (data) ->
+                expect(JSON.parse data).eql(right[file].map)
+            )
+          q.all(promises).done (-> done()), done
       )
+  describe "Glob test case", ->
+    right = {}
+    folders = ["test1", "test2", "test3"]
+    before (done) ->
+      promises = []
+      folders.forEach (folder) ->
+        result_path = pathJoin("tests/results/glob", folder, "source.css")
+        promises.push(
+          q.nfcall(
+            fs.readFile,
+            pathJoin("./tests/data/glob", folder, "source.css")
+          ).then(
+            (data) ->
+              if not right[result_path]
+                right[result_path] = {}
+              right[result_path].content = data.toString("utf-8").trim()
+          )
+          q.nfcall(
+            fs.readFile,
+            pathJoin("./tests/data/glob", folder, "source.css.map")
+          ).then(
+            (data) ->
+              if not right[result_path]
+                right[result_path] = {}
+              right[result_path].map = JSON.parse data.toString("utf-8")
+          )
+        )
+      q.all(promises).done (-> done()), done
+
+    it "The files should be compiled properly", (done) ->
+      defer = q.defer()
+      g.src(
+        "./tests/data/glob/**/*.scss"
+      ).pipe(
+        sourcemaps.init()
+      ).pipe(
+        scss("bundleExec": true)
+      ).pipe(
+        sourcemaps.write(
+          "./",
+          "includeContent": false
+          "sourceRoot": false
+        )
+      ).pipe(
+        g.dest("./tests/results/glob")
+      ).once("end", defer.resolve).once("error", defer.reject)
+      defer.promise.then(
+        ->
+          promises = []
+          folders.forEach (folder) ->
+            resultPath = pathJoin "./tests/results/glob", folder, "source.css"
+            promises.push q.nfcall(
+              fs.readFile,
+              resultPath
+            ).then(
+              (data) ->
+                expect(data.toString("utf-8")).equal right[resultPath].content
+            )
+            promises.push q.nfcall(
+              fs.readFile,
+              resultPath + ".map"
+            ).then(
+              (map) ->
+                expect(JSON.parse(map)).eql right[resultPath].map
+            )
+          q.all(promises)
+      ).done (-> done()), done
