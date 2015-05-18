@@ -33,24 +33,13 @@ compile = inject [
         q.nfcall(mkdirp, tmpDir).then(
           ->
             defer = q.defer()
-            tmp = file.clone()
-            tmpWriteStream = fs.createWriteStream(
-              path.join tmpDir, path.basename tmp.relative
-            )
-            tmpWriteStream.on "finish", defer.resolve
-            tmpWriteStream.on "error", defer.reject
-            tmp.pipe tmpWriteStream, "end": true
-            return defer.promise
-        ).then(
-          ->
-            defer = q.defer()
             command = []
             if options.bundleExec
               command = command.concat "bundle", "exec"
             command.push "scss"
             command = command.concat([
               "--sourcemap=#{options.sourcemap}"
-              path.join tmpDir, path.basename file.relative
+              file.path
               path.join(
                 tmpDir,
                 gutil.replaceExtension(path.basename(file.relative), ".css")
@@ -75,7 +64,14 @@ compile = inject [
             sourcemap = mapConverter.fromMapFileSource contents, tmpDir
 
             if sourcemap
-              applySourceMap file, sourcemap.sourcemap
+              sourcemap = sourcemap.sourcemap
+              if options.sourcemap is "auto"
+                sourcemap.sources = sourcemap.sources.map (file) ->
+                  path.relative(
+                    process.cwd(),
+                    path.resolve tmpDir, file
+                  )
+              applySourceMap file, sourcemap
             file.contents = new Buffer(
               mapConverter.removeMapFileComments(contents).trim()
             )

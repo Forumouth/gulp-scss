@@ -3,7 +3,7 @@ sinon = require "sinon"
 through2 = require "through2"
 path = require "path"
 deepcopy = require "deepcopy"
-guitl = require "gulp-util"
+gutil = require "gulp-util"
 
 describe "SCSS unit test", ->
   objectToInject = undefined
@@ -15,6 +15,8 @@ describe "SCSS unit test", ->
   ioMap = undefined
 
   beforeEach ->
+    delete process.env.testing
+    delete require.cache[require.resolve "../src/scss.coffee"]
     process.env.testing = true
     scss = require "../src/scss.coffee"
 
@@ -46,10 +48,6 @@ describe "SCSS unit test", ->
         "readFileSync": (path) -> file.contents
       "mkdirp": sinon.stub().callsArg 1
     func_scss = scss.__compile__.invoke objectToInject
-
-  afterEach ->
-    delete process.env.testing
-    delete require.cache[require.resolve "../src/scss.coffee"]
 
   describe "Null File", ->
     beforeEach ->
@@ -85,12 +83,7 @@ describe "SCSS unit test", ->
                 "exec"
                 "scss"
                 "--sourcemap=auto"
-                path.join(
-                  file.cwd,
-                  ".gulp-scss-cache",
-                  path.relative(file.cwd, file.base),
-                  "source.scss"
-                )
+                gutil.replaceExtension file.path, ".scss"
                 path.join(
                   file.cwd,
                   ".gulp-scss-cache",
@@ -123,12 +116,7 @@ describe "SCSS unit test", ->
               objectToInject.exec.calledWithExactly [
                 "scss"
                 "--sourcemap=auto"
-                path.join(
-                  file.cwd,
-                  ".gulp-scss-cache",
-                  path.relative(file.cwd, file.base),
-                  "source.scss"
-                )
+                gutil.replaceExtension file.path, ".scss"
                 path.join(
                   file.cwd,
                   ".gulp-scss-cache",
@@ -158,19 +146,6 @@ describe "SCSS unit test", ->
           )).is.ok
         ).done (-> done()), done
 
-      it "writeFile should be called with \"test/test.scss\"", (done) ->
-        func_promise.then(
-          ->
-            expect(
-              objectToInject.fs.createWriteStream.calledWith(path.join(
-                file.cwd,
-                "test",
-                path.relative(file.cwd, file.base),
-                file.relative
-              ))
-            ).is.ok
-        ).done (-> done()), done
-
     describe "When sourcemap has special options", ->
       for smvalue in ["auto", "file", "inline", "none"]
         do (smvalue) ->
@@ -185,12 +160,7 @@ describe "SCSS unit test", ->
                 -> expect(objectToInject.exec.calledWithExactly([
                     "scss"
                     "--sourcemap=#{smvalue}"
-                    path.join(
-                      file.cwd,
-                      ".gulp-scss-cache",
-                      path.relative(file.cwd, file.base),
-                      "source.scss"
-                    )
+                    gutil.replaceExtension file.path, ".scss"
                     path.join(
                       file.cwd,
                       ".gulp-scss-cache",
@@ -212,12 +182,7 @@ describe "SCSS unit test", ->
             objectToInject.exec.calledWithExactly [
               "scss"
               "--sourcemap=auto"
-              path.join(
-                file.cwd,
-                ".gulp-scss-cache",
-                path.relative(file.cwd, file.base),
-                "source.scss"
-              )
+              gutil.replaceExtension file.path, ".scss"
               path.join(
                 file.cwd,
                 ".gulp-scss-cache",

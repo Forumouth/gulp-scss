@@ -4,8 +4,8 @@ q = require "q"
 g = require "gulp"
 gutil = require "gulp-util"
 sourcemaps = require "gulp-sourcemaps"
-t = require "through2"
-pathJoin = require("path").join
+removeMapFile = require("convert-source-map").removeMapFileComments
+path = require "path"
 
 describe "SCSS integration tests", ->
   scss = require "../src/scss"
@@ -17,13 +17,19 @@ describe "SCSS integration tests", ->
           fs.readFile,
           "./tests/data/single/source.css"
         ).then(
-          (css) -> right.file = css.toString("utf-8").trim()
+          (css) -> right.file = removeMapFile(css.toString "utf-8").trim()
         )
         q.nfcall(
           fs.readFile,
           "./tests/data/single/source.css.map"
         ).then(
-          (map) -> right.sourcemap = JSON.parse(map.toString "utf-8")
+          (map) ->
+            right.sourcemap = JSON.parse(map)
+            right.sourcemap.sources = right.sourcemap.sources.map(
+              (file) -> path.relative(
+                process.cwd(), path.resolve "./tests/data/single", file
+              )
+            )
         )
       ]
       q.all(targetPromises).done (-> done()), done
@@ -57,11 +63,9 @@ describe "SCSS integration tests", ->
         ]).then(
           (data) ->
             expect(
-              data[0].toString "utf-8"
+              removeMapFile(data[0].toString "utf-8").trim()
             ).equal right.file
-            expect(
-              JSON.parse(data[1].toString "utf-8")
-            ).eql right.sourcemap
+            expect(JSON.parse(data[1])).eql right.sourcemap
         )
       ).done (-> done()), done
 
@@ -77,30 +81,38 @@ describe "SCSS integration tests", ->
       targetFiles.forEach (file) ->
         promises.push q.nfcall(
           fs.readFile,
-          pathJoin("./tests/data/multiple", file)
+          path.join("./tests/data/multiple", file)
         ).then(
           (data) ->
-            resultPath = pathJoin("./tests/results/multiple", file)
+            resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
-            right[resultPath].content = data.toString("utf-8").trim()
+            right[resultPath].content = removeMapFile(
+              data.toString("utf-8")
+            ).trim()
         )
         promises.push q.nfcall(
           fs.readFile,
-          pathJoin("./tests/data/multiple", file + ".map")
+          path.join("./tests/data/multiple", file + ".map")
         ).then(
           (data) ->
-            resultPath = pathJoin("./tests/results/multiple", file)
+            resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
             right[resultPath].map = JSON.parse data.toString("utf-8")
+            right[resultPath].map.sources = right[resultPath].map.sources.map(
+              (file) -> path.relative(
+                process.cwd()
+                path.resolve "./tests/data/multiple", file
+              )
+            )
         )
       q.all(promises).done (-> done()), done
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
       g.src((
-        pathJoin(
+        path.join(
           "./tests/data/multiple",
           gutil.replaceExtension(file, ".scss")
         ) for file in targetFiles
@@ -116,9 +128,8 @@ describe "SCSS integration tests", ->
 
       defer.promise.then(
         ->
-          files = (
-            pathJoin("./tests/results/multiple", file) for file in targetFiles
-          )
+          files = targetFiles.map (file) ->
+            path.join("./tests/results/multiple", file)
 
           promises = []
           files.forEach (file) ->
@@ -127,17 +138,14 @@ describe "SCSS integration tests", ->
             ).then(
               (data) ->
                 expect(
-                  data.toString("utf-8").trim()
+                  removeMapFile(data.toString "utf-8").trim()
                 ).equal(
                   right[file].content
                 )
             )
             promises.push q.nfcall(
               fs.readFile, file + ".map"
-            ).then(
-              (data) ->
-                expect(JSON.parse data).eql(right[file].map)
-            )
+            ).then((data) -> expect(JSON.parse data).eql right[file].map)
           q.all(promises).done (-> done()), done
       )
   describe "Glob test case", ->
@@ -146,25 +154,36 @@ describe "SCSS integration tests", ->
     before (done) ->
       promises = []
       folders.forEach (folder) ->
-        result_path = pathJoin("tests/results/glob", folder, "source.css")
+        result_path = path.join("tests/results/glob", folder, "source.css")
         promises.push(
           q.nfcall(
             fs.readFile,
-            pathJoin("./tests/data/glob", folder, "source.css")
+            path.join("./tests/data/glob", folder, "source.css")
           ).then(
             (data) ->
               if not right[result_path]
                 right[result_path] = {}
-              right[result_path].content = data.toString("utf-8").trim()
+              right[result_path].content = removeMapFile(
+                data.toString "utf-8"
+              ).trim()
           )
           q.nfcall(
             fs.readFile,
-            pathJoin("./tests/data/glob", folder, "source.css.map")
+            path.join("./tests/data/glob", folder, "source.css.map")
           ).then(
             (data) ->
               if not right[result_path]
                 right[result_path] = {}
-              right[result_path].map = JSON.parse data.toString("utf-8")
+              right[result_path].map = JSON.parse data
+              # BUG: gulp-sourcemaps can't generate correct file field
+              delete right[result_path].map.file
+              right[result_path].map.sources =
+                right[result_path].map.sources.map (file) ->
+                  path.relative(
+                    process.cwd(),
+                    path.resolve path.join("./tests/data/glob", folder),
+                    file
+                  )
           )
         )
       q.all(promises).done (-> done()), done
@@ -179,9 +198,7 @@ describe "SCSS integration tests", ->
         scss("bundleExec": true)
       ).pipe(
         sourcemaps.write(
-          "./",
-          "includeContent": false
-          "sourceRoot": false
+          "./", "includeContent": false
         )
       ).pipe(
         g.dest("./tests/results/glob")
@@ -190,20 +207,88 @@ describe "SCSS integration tests", ->
         ->
           promises = []
           folders.forEach (folder) ->
-            resultPath = pathJoin "./tests/results/glob", folder, "source.css"
+            resultPath = path.join(
+              "./tests/results/glob",
+              folder,
+              "source.css"
+            )
             promises.push q.nfcall(
               fs.readFile,
               resultPath
             ).then(
               (data) ->
-                expect(data.toString("utf-8")).equal right[resultPath].content
+                expect(
+                  removeMapFile(data.toString "utf-8").trim()
+                ).equal right[resultPath].content
             )
             promises.push q.nfcall(
               fs.readFile,
               resultPath + ".map"
             ).then(
               (map) ->
-                expect(JSON.parse(map)).eql right[resultPath].map
+                sourcemap = JSON.parse map
+                # BUG: gulp-sourcemaps can't generate correct file field
+                delete sourcemap.file
+                expect(sourcemap).eql right[resultPath].map
             )
           q.all(promises)
+      ).done (-> done()), done
+
+  describe "Import test case", ->
+    right = {}
+    beforeEach (done) ->
+      promises = [
+        q.nfcall(
+          fs.readFile,
+          "./tests/data/imports/main.css"
+        ).then(
+          (data) -> right.content = removeMapFile(
+            data.toString("utf-8")
+          ).trim()
+        )
+        q.nfcall(
+          fs.readFile,
+          "./tests/data/imports/main.css.map"
+        ).then(
+          (data) ->
+            right.map = JSON.parse data
+            right.map.sources = right.map.sources.map (file) ->
+              path.relative(
+                process.cwd(),
+                path.resolve "./tests/data/imports", file
+              )
+        )
+      ]
+      q.all(promises).done (-> done()), done
+
+    it "The code should be compiled properly", (done) ->
+      defer = q.defer()
+      g.src(
+        "./tests/data/imports/main.scss"
+      ).pipe(
+        sourcemaps.init()
+      ).pipe(
+        scss "bundleExec": true
+      ).pipe(
+        sourcemaps.write("./", ("includeContent": false))
+      ).pipe(
+        g.dest("./tests/results/imports")
+      ).once("end", defer.resolve).once("error", defer.reject)
+
+      defer.promise.then(
+        ->
+          promises = []
+          promises.push q.nfcall(
+            fs.readFile,
+            "./tests/results/imports/main.css"
+          ).then(
+            (data) -> expect(
+              removeMapFile(data.toString "utf-8").trim()
+            ).equal right.content
+          )
+          promises.push q.nfcall(
+            fs.readFile,
+            "./tests/results/imports/main.css.map"
+          ).then((data) -> expect(JSON.parse data).eql right.map)
+          q.all promises
       ).done (-> done()), done
