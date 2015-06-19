@@ -41,11 +41,16 @@ as you can see above. In particular, `scss` function has a parameter named optio
 
 When options are falsy, normal options are used.
 
-### options.bundleExec (boolean, default: false)
+### Note
+As of 1.2.0, options are passed to scss thru
+[dargs](https://github.com/sindresorhus/dargs).
+Therefore, all options except the following will be passed to scss directly
+
+#### options.bundleExec (boolean, default: false)
 When this option is true, `bundle exec scss` is used instead of `scss`. Otherwise,
 `scss` is used instead of `bundle exec scss`
 
-### options.tmpPath (string, default: `.gulp-scss-cache`)
+#### options.tmpPath (string, default: `.gulp-scss-cache`)
 Specifies temporary path to store the compiled files.
 Note that you should specify the path as relative path
 
