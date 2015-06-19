@@ -1,4 +1,5 @@
 inject = require("node-kissdi").inject
+dargs = require "dargs"
 through = require "through2"
 gutil = require "gulp-util"
 merge = require "merge"
@@ -22,6 +23,9 @@ compile = inject [
           "sourcemap": "auto"
           "tmpPath": ".gulp-scss-cache"
         merge(options, opts)
+        passedArgs = dargs options, (
+          "excludes": ["bundleExec", "tmpPath"]
+        )
         tmpDir = path.join(
           file.cwd,
           options.tmpPath,
@@ -37,16 +41,16 @@ compile = inject [
             if options.bundleExec
               command = command.concat "bundle", "exec"
             command.push "scss"
-            command = command.concat([
-              "--sourcemap=#{options.sourcemap}"
+            command = command.concat(
+              passedArgs
               file.path
               path.join(
                 tmpDir,
                 gutil.replaceExtension(path.basename(file.relative), ".css")
               )
-            ])
+            )
 
-            proc = exec command.join(" ")
+            proc = exec command.join " "
             proc.on "error", defer.reject
             proc.on "close", defer.resolve
             return defer.promise
