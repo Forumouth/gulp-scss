@@ -41,16 +41,16 @@ compile = inject [
             if options.bundleExec
               command = command.concat "bundle", "exec"
             command.push "scss"
-            command = command.concat([
+            command = command.concat(
               passedArgs
               file.path
               path.join(
                 tmpDir,
                 gutil.replaceExtension(path.basename(file.relative), ".css")
               )
-            ])
+            )
 
-            proc = exec command.join(" ")
+            proc = exec command.join " "
             proc.on "error", defer.reject
             proc.on "close", defer.resolve
             return defer.promise
