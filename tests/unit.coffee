@@ -98,7 +98,9 @@ describe "SCSS unit test", ->
       it("file path should be replaced with .gulp-scss-cache/source.css",
           (done) ->
             func_promise.then(
-              -> expect(file.path).equal "/tests/data/source.css"
+              -> expect(file.path).equal(
+                path.join path.sep + "tests", "data", "source.css"
+              )
             ).done (-> done()), done
         )
 
@@ -128,7 +130,9 @@ describe "SCSS unit test", ->
         ).done (-> done()), done
 
       it "Path should have css extension", ->
-        expect(file.path).is.equal "/tests/data/source.css"
+        expect(file.path).is.equal(
+          path.join path.sep + "tests", "data", "source.css"
+        )
 
     describe "When path is specified", ->
       func_promise = undefined
@@ -194,7 +198,9 @@ describe "SCSS unit test", ->
       ).done (-> done()), done
 
     it "Path should have css extension", ->
-      expect(file.path).is.equal "/tests/data/source.css"
+      expect(file.path).is.equal(
+        path.join path.sep + "tests", "data", "source.css"
+      )
 
 
 describe "For non-testing mode", ->
