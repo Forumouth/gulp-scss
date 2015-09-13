@@ -88,6 +88,7 @@ describe "SCSS integration tests", ->
           path.join("./tests/data/multiple", file)
         ).then(
           (data) ->
+            console.log data.toString "utf8"
             resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
@@ -100,6 +101,7 @@ describe "SCSS integration tests", ->
           path.join("./tests/data/multiple", file + ".map")
         ).then(
           (data) ->
+            console.log data.toString "utf8"
             resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
