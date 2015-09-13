@@ -13,6 +13,5 @@ test_script:
   - npm test
 
 build: off
-artifacts:
-  - path: tests\results
-    name: TestResult
+on_failure:
+  - ps: Show-Tree .
