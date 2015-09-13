@@ -15,12 +15,3 @@ test_script:
   - npm test
 
 build: off
-
-artifacts:
-  - path: tests\results
-    name: Test result
-    type: zip
-
-on_failure:
-  - 7z a failure.zip .\
-  - ps: Push-AppveyorArtifact failure.zip
