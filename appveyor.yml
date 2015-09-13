@@ -22,4 +22,5 @@ artifacts:
     type: zip
 
 on_failure:
-  - ps: Push-AppveyorArtifact .\
+  - 7z a failure.zip .\
+  - ps: Push-AppveyorArtifact failure.zip
