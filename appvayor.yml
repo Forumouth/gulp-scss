@@ -1,0 +1,12 @@
+environment:
+  nodejs_version: "0.12"
+
+install:
+  - gem install bundler
+  - ps: Install-Product node 3
+  - npm install
+
+test_script:
+  - node --version
+  - npm --version
+  - npm test
