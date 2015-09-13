@@ -27,8 +27,8 @@ describe "SCSS integration tests", ->
           fs.readFile,
           "./tests/data/single/source.css.map"
         ).then(
-          (map) ->
-            right.sourcemap = JSON.parse(map.toString "utf-8")
+          (sourcemap) ->
+            right.sourcemap = JSON.parse(sourcemap.toString "utf-8")
             right.sourcemap.sources = right.sourcemap.sources.map(
               (file) -> path.relative(
                 process.cwd(), path.resolve "./tests/data/single", file
@@ -103,13 +103,14 @@ describe "SCSS integration tests", ->
             resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
-            right[resultPath].map = JSON.parse data.toString("utf-8")
-            right[resultPath].map.sources = right[resultPath].map.sources.map(
-              (file) -> path.relative(
-                process.cwd()
-                path.resolve "./tests/data/multiple", file
-              ).replace /\\/g, "/"
-            )
+            right[resultPath].sourcemap = JSON.parse data
+            right[resultPath].sourcemap.sources =
+              right[resultPath].sourcemap.sources.map(
+                (file) -> path.relative(
+                  process.cwd()
+                  path.resolve "./tests/data/multiple", file
+                ).replace /\\/g, "/"
+              )
         )
       q.all(promises).done (-> done()), done
 
@@ -149,7 +150,9 @@ describe "SCSS integration tests", ->
             )
             promises.push q.nfcall(
               fs.readFile, file + ".map"
-            ).then((data) -> expect(JSON.parse data).eql right[file].map)
+            ).then(
+              (data) -> expect(JSON.parse data).eql right[file].sourcemap
+            )
           q.all(promises).done (-> done()), done
       )
   describe "Glob test case", ->
