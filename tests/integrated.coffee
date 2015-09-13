@@ -272,7 +272,9 @@ describe "SCSS integration tests", ->
     it "The code should be compiled properly", (done) ->
       defer = q.defer()
       g.src(
-        "./tests/data/imports/main.scss"
+        "./tests/data/imports/main.scss", (
+          "encoding": "utf8"
+        )
       ).pipe(
         sourcemaps.init()
       ).pipe(
