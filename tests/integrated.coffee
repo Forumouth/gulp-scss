@@ -9,6 +9,10 @@ path = require "path"
 
 describe "SCSS integration tests", ->
   scss = require "../src/scss"
+  options =
+    "bundleExec": true
+    "unixNewlines": true
+    "defaultEncoding": "utf-8"
   describe "Single File Case", ->
     right = {}
     before (done) ->
@@ -43,7 +47,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss("bundleExec": true)
+        scss(options)
       ).pipe(
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
@@ -195,7 +199,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss("bundleExec": true)
+        scss(options)
       ).pipe(
         sourcemaps.write(
           "./", "includeContent": false

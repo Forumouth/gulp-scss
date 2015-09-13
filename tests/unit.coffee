@@ -45,7 +45,9 @@ describe "SCSS unit test", ->
             if event is "finish"
               callback()
         )
-        "readFile": (path, cb) ->
+        "readFile": (path, options, cb) ->
+          if typeof options is "function"
+            return options undefined, file.contents
           return cb undefined, file.contents
       "mkdirp": sinon.stub().callsArg 1
     func_scss = scss.__compile__.invoke objectToInject
