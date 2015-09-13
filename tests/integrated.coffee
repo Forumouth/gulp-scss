@@ -43,7 +43,9 @@ describe "SCSS integration tests", ->
     it "The file should be compiled properly", (done) ->
       compilationDefer = q.defer()
       g.src(
-        "./tests/data/single/source.scss"
+        "./tests/data/single/source.scss", (
+          "read": false
+        )
       ).pipe(
         sourcemaps.init()
       ).pipe(
@@ -121,6 +123,8 @@ describe "SCSS integration tests", ->
           "./tests/data/multiple",
           gutil.replaceExtension(file, ".scss")
         ) for file in targetFiles
+      ), (
+        "read": false
       )).pipe(
         sourcemaps.init()
       ).pipe(
@@ -142,7 +146,6 @@ describe "SCSS integration tests", ->
               fs.readFile, file
             ).then(
               (data) ->
-                console.log data.toString "utf-8"
                 expect(
                   removeMapFile(data.toString "utf-8").trim()
                 ).equal(
@@ -199,7 +202,9 @@ describe "SCSS integration tests", ->
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
       g.src(
-        "./tests/data/glob/**/*.scss"
+        "./tests/data/glob/**/*.scss", (
+          "read": false
+        )
       ).pipe(
         sourcemaps.init()
       ).pipe(
@@ -272,7 +277,9 @@ describe "SCSS integration tests", ->
     it "The code should be compiled properly", (done) ->
       defer = q.defer()
       g.src(
-        "./tests/data/imports/main.scss"
+        "./tests/data/imports/main.scss", (
+          "read": false
+        )
       ).pipe(
         sourcemaps.init()
       ).pipe(
