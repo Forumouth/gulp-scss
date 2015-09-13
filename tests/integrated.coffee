@@ -123,7 +123,7 @@ describe "SCSS integration tests", ->
       )).pipe(
         sourcemaps.init()
       ).pipe(
-        scss "bundleExec": true
+        scss options
       ).pipe(
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
@@ -272,7 +272,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss "bundleExec": true
+        scss options
       ).pipe(
         sourcemaps.write("./", ("includeContent": false))
       ).pipe(
