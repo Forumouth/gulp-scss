@@ -14,5 +14,4 @@ test_script:
 
 build: off
 on_failure:
-  - ps: tree ./tests/results
-  - ps: tree ./gulp-scss-cache
+  - ps: tree ./
