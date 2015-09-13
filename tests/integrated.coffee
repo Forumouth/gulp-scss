@@ -32,7 +32,7 @@ describe "SCSS integration tests", ->
             right.sourcemap.sources = right.sourcemap.sources.map(
               (file) -> path.relative(
                 process.cwd(), path.resolve "./tests/data/single", file
-              )
+              ).replace /\\\\/g, "/"
             )
         )
       ]
