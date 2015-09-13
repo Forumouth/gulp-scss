@@ -14,17 +14,17 @@ describe "SCSS integration tests", ->
     before (done) ->
       targetPromises = [
         q.nfcall(
-          fs.readFile.bind(fs.readFile),
+          fs.readFile,
           "./tests/data/single/source.css"
         ).then(
           (css) -> right.file = removeMapFile(css.toString "utf-8").trim()
         )
         q.nfcall(
-          fs.readFile.bind fs.readFile,
+          fs.readFile,
           "./tests/data/single/source.css.map"
         ).then(
           (map) ->
-            right.sourcemap = JSON.parse map
+            right.sourcemap = JSON.parse(map.toString "utf-8")
             right.sourcemap.sources = right.sourcemap.sources.map(
               (file) -> path.relative(
                 process.cwd(), path.resolve "./tests/data/single", file
@@ -58,14 +58,8 @@ describe "SCSS integration tests", ->
 
       compilationDefer.promise.then(
         -> q.all([
-          q.nfcall(
-            fs.readFile.bind fs.readFile,
-            "./tests/results/single/source.css"
-          )
-          q.nfcall(
-            fs.readFile.bind fs.readFile,
-            "./tests/results/single/source.css.map"
-          )
+          q.nfcall fs.readFile, "./tests/results/single/source.css"
+          q.nfcall fs.readFile, "./tests/results/single/source.css.map"
         ]).then(
           (data) ->
             expect(
@@ -86,7 +80,7 @@ describe "SCSS integration tests", ->
       promises = []
       targetFiles.forEach (file) ->
         promises.push q.nfcall(
-          fs.readFile.bind fs.readFile,
+          fs.readFile,
           path.join("./tests/data/multiple", file)
         ).then(
           (data) ->
@@ -98,7 +92,7 @@ describe "SCSS integration tests", ->
             ).trim()
         )
         promises.push q.nfcall(
-          fs.readFile.bind fs.readFile,
+          fs.readFile,
           path.join("./tests/data/multiple", file + ".map")
         ).then(
           (data) ->
@@ -140,7 +134,7 @@ describe "SCSS integration tests", ->
           promises = []
           files.forEach (file) ->
             promises.push q.nfcall(
-              fs.readFile.bind fs.readFile, file
+              fs.readFile, file
             ).then(
               (data) ->
                 expect(
@@ -150,7 +144,7 @@ describe "SCSS integration tests", ->
                 )
             )
             promises.push q.nfcall(
-              fs.readFile.bind fs.readFile, file + ".map"
+              fs.readFile, file + ".map"
             ).then((data) -> expect(JSON.parse data).eql right[file].map)
           q.all(promises).done (-> done()), done
       )
@@ -163,7 +157,7 @@ describe "SCSS integration tests", ->
         result_path = path.join("tests/results/glob", folder, "source.css")
         promises.push(
           q.nfcall(
-            fs.readFile.bind fs.readFile,
+            fs.readFile,
             path.join("./tests/data/glob", folder, "source.css")
           ).then(
             (data) ->
@@ -174,7 +168,7 @@ describe "SCSS integration tests", ->
               ).trim()
           )
           q.nfcall(
-            fs.readFile.bind fs.readFile,
+            fs.readFile,
             path.join("./tests/data/glob", folder, "source.css.map")
           ).then(
             (data) ->
@@ -219,7 +213,7 @@ describe "SCSS integration tests", ->
               "source.css"
             )
             promises.push q.nfcall(
-              fs.readFile.bind fs.readFile,
+              fs.readFile,
               resultPath
             ).then(
               (data) ->
@@ -228,7 +222,7 @@ describe "SCSS integration tests", ->
                 ).equal right[resultPath].content
             )
             promises.push q.nfcall(
-              fs.readFile.bind fs.readFile,
+              fs.readFile,
               resultPath + ".map"
             ).then(
               (map) ->
@@ -245,7 +239,7 @@ describe "SCSS integration tests", ->
     beforeEach (done) ->
       promises = [
         q.nfcall(
-          fs.readFile.bind fs.readFile,
+          fs.readFile,
           "./tests/data/imports/main.css"
         ).then(
           (data) -> right.content = removeMapFile(
@@ -253,7 +247,7 @@ describe "SCSS integration tests", ->
           ).trim()
         )
         q.nfcall(
-          fs.readFile.bind fs.readFile,
+          fs.readFile,
           "./tests/data/imports/main.css.map"
         ).then(
           (data) ->
@@ -285,7 +279,7 @@ describe "SCSS integration tests", ->
         ->
           promises = []
           promises.push q.nfcall(
-            fs.readFile.bind fs.readFile,
+            fs.readFile,
             "./tests/results/imports/main.css"
           ).then(
             (data) -> expect(
@@ -293,7 +287,7 @@ describe "SCSS integration tests", ->
             ).equal right.content
           )
           promises.push q.nfcall(
-            fs.readFile.bind fs.readFile,
+            fs.readFile,
             "./tests/results/imports/main.css.map"
           ).then((data) -> expect(JSON.parse data).eql right.map)
           q.all promises
