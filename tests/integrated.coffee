@@ -14,8 +14,6 @@ describe "SCSS integration tests", ->
     "bundleExec": true
     "unixNewlines": true
     "defaultEncoding": "utf-8"
-  if os.type() is "Windows_NT"
-    options.tmpPath = "gulp-scss-cache"
   describe "Single File Case", ->
     right = {}
     before (done) ->

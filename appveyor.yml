@@ -13,5 +13,11 @@ test_script:
   - npm test
 
 build: off
-on_failure:
-  - ps: tree /F ./
+
+artifacts:
+  - path: tests\results
+    name: Test result
+    type: zip
+
+on_failre:
+  - ps: Push-AppveyorArtifact tests\results
