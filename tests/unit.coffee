@@ -45,7 +45,8 @@ describe "SCSS unit test", ->
             if event is "finish"
               callback()
         )
-        "readFileSync": (path) -> file.contents
+        "readFile": (path, cb) ->
+          return cb undefined, file.contents
       "mkdirp": sinon.stub().callsArg 1
     func_scss = scss.__compile__.invoke objectToInject
 
