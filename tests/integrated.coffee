@@ -117,6 +117,12 @@ describe "SCSS integration tests", ->
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
+      console.log (
+        path.join(
+          "./tests/data/multiple",
+          gutil.replaceExtension(file, ".scss")
+        ) for file in targetFiles
+      )
       g.src((
         path.join(
           "./tests/data/multiple",
@@ -272,9 +278,7 @@ describe "SCSS integration tests", ->
     it "The code should be compiled properly", (done) ->
       defer = q.defer()
       g.src(
-        "./tests/data/imports/main.scss", (
-          "encoding": "utf8"
-        )
+        "./tests/data/imports/main.scss"
       ).pipe(
         sourcemaps.init()
       ).pipe(
