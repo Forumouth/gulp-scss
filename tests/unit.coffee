@@ -29,9 +29,9 @@ describe "SCSS unit test", ->
       "isBuffer": sinon.stub().returns true
       "isStream": sinon.stub().returns false
       "pipe": sinon.spy()
-      "path": "/tests/data/source.scss"
-      "cwd": "/"
-      "base": "/tests/data"
+      "path": path.join path.sep, "tests", "data", "source.scss"
+      "cwd": path.sep
+      "base": path.join path.sep, "tests", "data"
       "contents": new Buffer("Hello World")
       "relative": "source.scss"
 
@@ -45,7 +45,10 @@ describe "SCSS unit test", ->
             if event is "finish"
               callback()
         )
-        "readFileSync": (path) -> file.contents
+        "readFile": (path, options, cb) ->
+          if typeof options is "function"
+            return options undefined, file.contents
+          return cb undefined, file.contents
       "mkdirp": sinon.stub().callsArg 1
     func_scss = scss.__compile__.invoke objectToInject
 
@@ -98,7 +101,9 @@ describe "SCSS unit test", ->
       it("file path should be replaced with .gulp-scss-cache/source.css",
           (done) ->
             func_promise.then(
-              -> expect(file.path).equal "/tests/data/source.css"
+              -> expect(file.path).equal(
+                path.join path.sep + "tests", "data", "source.css"
+              )
             ).done (-> done()), done
         )
 
@@ -128,7 +133,9 @@ describe "SCSS unit test", ->
         ).done (-> done()), done
 
       it "Path should have css extension", ->
-        expect(file.path).is.equal "/tests/data/source.css"
+        expect(file.path).is.equal(
+          path.join path.sep + "tests", "data", "source.css"
+        )
 
     describe "When path is specified", ->
       func_promise = undefined
@@ -194,7 +201,9 @@ describe "SCSS unit test", ->
       ).done (-> done()), done
 
     it "Path should have css extension", ->
-      expect(file.path).is.equal "/tests/data/source.css"
+      expect(file.path).is.equal(
+        path.join path.sep + "tests", "data", "source.css"
+      )
 
 
 describe "For non-testing mode", ->

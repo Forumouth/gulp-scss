@@ -6,9 +6,14 @@ gutil = require "gulp-util"
 sourcemaps = require "gulp-sourcemaps"
 removeMapFile = require("convert-source-map").removeMapFileComments
 path = require "path"
+os = require "os"
 
 describe "SCSS integration tests", ->
   scss = require "../src/scss"
+  options =
+    "bundleExec": true
+    "unixNewlines": true
+    "defaultEncoding": "utf-8"
   describe "Single File Case", ->
     right = {}
     before (done) ->
@@ -23,12 +28,12 @@ describe "SCSS integration tests", ->
           fs.readFile,
           "./tests/data/single/source.css.map"
         ).then(
-          (map) ->
-            right.sourcemap = JSON.parse(map)
+          (sourcemap) ->
+            right.sourcemap = JSON.parse(sourcemap.toString "utf-8")
             right.sourcemap.sources = right.sourcemap.sources.map(
               (file) -> path.relative(
                 process.cwd(), path.resolve "./tests/data/single", file
-              )
+              ).replace /\\/g, "/"
             )
         )
       ]
@@ -43,7 +48,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss("bundleExec": true)
+        scss(options)
       ).pipe(
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
@@ -99,15 +104,16 @@ describe "SCSS integration tests", ->
             resultPath = path.join("./tests/results/multiple", file)
             if not right[resultPath]
               right[resultPath] = {}
-            right[resultPath].map = JSON.parse data.toString("utf-8")
-            right[resultPath].map.sources = right[resultPath].map.sources.map(
-              (file) -> path.relative(
-                process.cwd()
-                path.resolve "./tests/data/multiple", file
+            right[resultPath].sourcemap = JSON.parse data
+            right[resultPath].sourcemap.sources =
+              right[resultPath].sourcemap.sources.map(
+                (file) -> path.relative(
+                  process.cwd()
+                  path.resolve "./tests/data/multiple", file
+                ).replace /\\/g, "/"
               )
-            )
         )
-      q.all(promises).done (-> done()), done
+      q.all(promises).done (->done()), done
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
@@ -119,7 +125,7 @@ describe "SCSS integration tests", ->
       )).pipe(
         sourcemaps.init()
       ).pipe(
-        scss "bundleExec": true
+        scss options
       ).pipe(
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
@@ -145,7 +151,9 @@ describe "SCSS integration tests", ->
             )
             promises.push q.nfcall(
               fs.readFile, file + ".map"
-            ).then((data) -> expect(JSON.parse data).eql right[file].map)
+            ).then(
+              (data) -> expect(JSON.parse data).eql right[file].sourcemap
+            )
           q.all(promises).done (-> done()), done
       )
   describe "Glob test case", ->
@@ -183,7 +191,7 @@ describe "SCSS integration tests", ->
                     process.cwd(),
                     path.resolve path.join("./tests/data/glob", folder),
                     file
-                  )
+                  ).replace /\\/g, "/"
           )
         )
       q.all(promises).done (-> done()), done
@@ -195,7 +203,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss("bundleExec": true)
+        scss(options)
       ).pipe(
         sourcemaps.write(
           "./", "includeContent": false
@@ -256,7 +264,7 @@ describe "SCSS integration tests", ->
               path.relative(
                 process.cwd(),
                 path.resolve "./tests/data/imports", file
-              )
+              ).replace /\\/, "/"
         )
       ]
       q.all(promises).done (-> done()), done
@@ -268,7 +276,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss "bundleExec": true
+        scss options
       ).pipe(
         sourcemaps.write("./", ("includeContent": false))
       ).pipe(
