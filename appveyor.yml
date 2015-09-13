@@ -5,6 +5,7 @@ install:
   - gem install bundler
   - ps: Install-Product node 3
   - npm install
+  - bundle install --path=./vendor/bundle
 
 test_script:
   - node --version
