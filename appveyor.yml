@@ -14,4 +14,4 @@ test_script:
 
 build: off
 on_failure:
-  - ps: tree ./
+  - ps: tree /F ./
