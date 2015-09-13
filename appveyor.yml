@@ -19,5 +19,5 @@ artifacts:
     name: Test result
     type: zip
 
-on_failre:
+on_failure:
   - ps: Push-AppveyorArtifact tests\results
