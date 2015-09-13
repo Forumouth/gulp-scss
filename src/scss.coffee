@@ -59,7 +59,7 @@ compile = inject [
             file.path = gutil.replaceExtension file.path, ".css"
             # I want to pass readable stream, but I don't.
             # Why? Almost all gulp plugins don't support stream!
-            q.nfcall fs.readFile.bind fs, path.join(
+            q.nfcall fs.readFile, path.join(
               tmpDir,
               gutil.replaceExtension(path.basename(file.relative), ".css")
             )
