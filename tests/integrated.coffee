@@ -112,7 +112,11 @@ describe "SCSS integration tests", ->
                 ).replace /\\/g, "/"
               )
         )
-      q.all(promises).done (-> done()), done
+      q.all(promises).done (
+        ->
+          console.log right
+          done()
+      ), done
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
