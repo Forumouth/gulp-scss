@@ -24,7 +24,7 @@ describe "SCSS integration tests", ->
           "./tests/data/single/source.css.map"
         ).then(
           (map) ->
-            right.sourcemap = JSON.parse(map)
+            right.sourcemap = JSON.parse(map.toString "utf-8")
             right.sourcemap.sources = right.sourcemap.sources.map(
               (file) -> path.relative(
                 process.cwd(), path.resolve "./tests/data/single", file
