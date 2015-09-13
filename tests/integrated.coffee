@@ -117,7 +117,7 @@ describe "SCSS integration tests", ->
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
-      g.src.bind(g.src)((
+      g.src((
         path.join(
           "./tests/data/multiple",
           gutil.replaceExtension(file, ".scss")
