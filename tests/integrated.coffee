@@ -117,13 +117,7 @@ describe "SCSS integration tests", ->
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
-      console.log (
-        path.join(
-          "./tests/data/multiple",
-          gutil.replaceExtension(file, ".scss")
-        ) for file in targetFiles
-      )
-      g.src((
+      g.src.bind(g.src)((
         path.join(
           "./tests/data/multiple",
           gutil.replaceExtension(file, ".scss")
