@@ -108,7 +108,7 @@ describe "SCSS integration tests", ->
               (file) -> path.relative(
                 process.cwd()
                 path.resolve "./tests/data/multiple", file
-              )
+              ).replace /\\/g, "/"
             )
         )
       q.all(promises).done (-> done()), done
@@ -187,7 +187,7 @@ describe "SCSS integration tests", ->
                     process.cwd(),
                     path.resolve path.join("./tests/data/glob", folder),
                     file
-                  )
+                  ).replace /\\/g, "/"
           )
         )
       q.all(promises).done (-> done()), done
@@ -260,7 +260,7 @@ describe "SCSS integration tests", ->
               path.relative(
                 process.cwd(),
                 path.resolve "./tests/data/imports", file
-              )
+              ).replace /\\/, "/"
         )
       ]
       q.all(promises).done (-> done()), done
