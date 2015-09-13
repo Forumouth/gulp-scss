@@ -29,9 +29,9 @@ describe "SCSS unit test", ->
       "isBuffer": sinon.stub().returns true
       "isStream": sinon.stub().returns false
       "pipe": sinon.spy()
-      "path": "/tests/data/source.scss"
-      "cwd": "/"
-      "base": "/tests/data"
+      "path": path.join path.sep, "tests", "data", "source.scss"
+      "cwd": path.sep
+      "base": path.join path.sep, "tests", "data"
       "contents": new Buffer("Hello World")
       "relative": "source.scss"
 
