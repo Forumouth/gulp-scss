@@ -1,6 +1,8 @@
 environment:
   nodejs_version: "0.12"
 
+clone_folder: c:\projects\gulp-scss
+
 install:
   - gem install bundler
   - ps: Install-Product node $env:nodejs_version
