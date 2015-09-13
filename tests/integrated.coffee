@@ -6,6 +6,7 @@ gutil = require "gulp-util"
 sourcemaps = require "gulp-sourcemaps"
 removeMapFile = require("convert-source-map").removeMapFileComments
 path = require "path"
+os = require "os"
 
 describe "SCSS integration tests", ->
   scss = require "../src/scss"
@@ -13,6 +14,8 @@ describe "SCSS integration tests", ->
     "bundleExec": true
     "unixNewlines": true
     "defaultEncoding": "utf-8"
+  if os.type() is "Windows_NT"
+    options.tmpPath = "gulp-scss-cache"
   describe "Single File Case", ->
     right = {}
     before (done) ->
