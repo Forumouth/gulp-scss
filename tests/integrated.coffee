@@ -142,6 +142,7 @@ describe "SCSS integration tests", ->
               fs.readFile, file
             ).then(
               (data) ->
+                console.log data.toString "utf-8"
                 expect(
                   removeMapFile(data.toString "utf-8").trim()
                 ).equal(
