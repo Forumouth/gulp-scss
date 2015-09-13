@@ -77,7 +77,6 @@ describe "SCSS unit test", ->
       it "exec function should be called with bundle exec scss", (done) ->
         func_promise.then(
           ->
-            console.log objectToInject.exec.getCall(0).args
             expect(
               objectToInject.exec.calledWithExactly [
                 "bundle"
