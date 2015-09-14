@@ -1,6 +1,7 @@
 # Gulp Plugin for SCSS compiler by standard approach
 
-[![Build Status](https://travis-ci.org/Forumouth/gulp-scss.svg?branch=master)](https://travis-ci.org/Forumouth/gulp-scss)
+OS X/Linux: [![Build Status](https://travis-ci.org/Forumouth/gulp-scss.svg?branch=master)](https://travis-ci.org/Forumouth/gulp-scss)
+Windows: [![Build status on Windows ](https://ci.appveyor.com/api/projects/status/t756bxbt0nr4ekid?svg=true)](https://ci.appveyor.com/project/hiroaki-yamamoto/gulp-scss)
 
 [![NPM](https://nodei.co/npm/gulp-scss.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/gulp-scss/)
 
