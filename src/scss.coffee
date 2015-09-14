@@ -18,7 +18,6 @@ compile = inject [
       (file, enc, cb) ->
         if file.isNull()
           return cb null, file
-        console.log file.contents.toString "utf8"
         options =
           "bundleExec": false
           "sourcemap": "auto"
