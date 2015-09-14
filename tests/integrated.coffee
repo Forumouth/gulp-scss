@@ -3,17 +3,25 @@ fs = require "fs"
 q = require "q"
 g = require "gulp"
 gutil = require "gulp-util"
-sourcemaps = require "gulp-sourcemaps"
 removeMapFile = require("convert-source-map").removeMapFileComments
 path = require "path"
+rm = require "rimraf"
 os = require "os"
 
 describe "SCSS integration tests", ->
-  scss = require "../src/scss"
+  scss = undefined
+  sourcemaps = undefined
   options =
     "bundleExec": true
-    "unixNewlines": true
-    "defaultEncoding": "utf-8"
+  before (done) ->
+    rm "./tests/results", done
+  beforeEach ->
+    sourcemaps = require "gulp-sourcemaps"
+    scss = require "../src/scss"
+  afterEach ->
+    delete require.cache[require.resolve "gulp-sourcemaps"]
+    delete require.cache[require.resolve "../src/scss.coffee"]
+
   describe "Single File Case", ->
     right = {}
     before (done) ->
@@ -38,8 +46,6 @@ describe "SCSS integration tests", ->
         )
       ]
       q.all(targetPromises).done (-> done()), done
-    after ->
-      delete require.cache[require.resolve "../src/scss.coffee"]
 
     it "The file should be compiled properly", (done) ->
       compilationDefer = q.defer()
@@ -48,7 +54,7 @@ describe "SCSS integration tests", ->
       ).pipe(
         sourcemaps.init()
       ).pipe(
-        scss(options)
+        scss options
       ).pipe(
         sourcemaps.write("./", "includeContent": false)
       ).pipe(
@@ -75,6 +81,7 @@ describe "SCSS integration tests", ->
       ).done (-> done()), done
 
   describe "Multiple Files Case", ->
+    this.timeout 30000
     right = {}
     targetFiles = [
       "test1.css"
@@ -113,21 +120,24 @@ describe "SCSS integration tests", ->
                 ).replace /\\/g, "/"
               )
         )
-      q.all(promises).done (->done()), done
+      q.all(promises).then(->done()).catch done
 
     it "The files should be compiled properly", (done) ->
       defer = q.defer()
-      g.src((
+      sources = (
         path.join(
-          "./tests/data/multiple",
-          gutil.replaceExtension(file, ".scss")
+          "./tests/data/multiple", gutil.replaceExtension(file, ".scss")
         ) for file in targetFiles
-      )).pipe(
+      )
+
+      g.src(
+        sources
+      ).pipe(
         sourcemaps.init()
       ).pipe(
         scss options
       ).pipe(
-        sourcemaps.write("./", "includeContent": false)
+        sourcemaps.write "./", "includeContent": false
       ).pipe(
         g.dest("./tests/results/multiple")
       ).on("end", defer.resolve).once("error", defer.reject)
@@ -157,6 +167,7 @@ describe "SCSS integration tests", ->
           q.all(promises).done (-> done()), done
       )
   describe "Glob test case", ->
+    this.timeout 30000
     right = {}
     folders = ["test1", "test2", "test3"]
     before (done) ->
@@ -264,7 +275,7 @@ describe "SCSS integration tests", ->
               path.relative(
                 process.cwd(),
                 path.resolve "./tests/data/imports", file
-              ).replace /\\/, "/"
+              ).replace /\\/g, "/"
         )
       ]
       q.all(promises).done (-> done()), done

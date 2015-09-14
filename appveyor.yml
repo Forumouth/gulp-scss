@@ -1,7 +1,8 @@
 environment:
   nodejs_version: "0.12"
 
-clone_folder: c:\projects\gulp-scss
+init:
+  - git config --global core.autocrlf true
 
 install:
   - gem install bundler
