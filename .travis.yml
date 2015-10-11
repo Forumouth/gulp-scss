@@ -12,6 +12,9 @@ before_install:
 before_script:
   - bundle install --path=./vendor/bundle
 
+after_script:
+  - echo "Travis Slug: ${TRAVIS_REPO_SLUG}"
+
 before_deploy:
   - npm run compile
   - sed -i -e "/lib\//D" .gitignore
