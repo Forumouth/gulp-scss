@@ -33,3 +33,4 @@ Gemfile.lock
 .bundle
 .gulp-scss-cache
 tests/results
+lib/
