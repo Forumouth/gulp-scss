@@ -4,7 +4,8 @@
   "description": "Gulp plugin for sass stylesheet compiler by standard approach",
   "main": "lib/scss.js",
   "scripts": {
-    "test": "gulp unit-test integration-test"
+    "test": "gulp unit-test integration-test",
+    "compile": "gulp compile"
   },
   "repository": {
     "type": "git",

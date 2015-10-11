@@ -10,3 +10,26 @@ before_install:
 
 before_script:
   - "bundle install --path=./vendor/bundle"
+
+before_deploy:
+  - npm run compile
+  - sed -i -e "/\/lib\//D" .gitignore
+  - git config --global user.email "test@example.com"
+  - git config --global user.name "Mr. Travis CI"
+  - git add .
+  - git commit -m "Commit to make tarball"
+  - git archive --format=tar.gz HEAD > ./${TRAVIS_TAG}-compiled.tar.gz
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: "Qr4HN3QAcoaJ1jLe1H2IZLPhcPEYHQNcnYUBuh4bZMOES8tE7Y5KjzqULiHbcrztGtBQegGEnkP+9dRnujOOkgtJe5abYu5y3MIRl5GIUQDB7fPWdTaEWHpeBtxWicZnRKhBzwOuzswTsDKtronpzEEGtIPsF7axmorGYXQnoZkV5iMWpuxe6BZuDDt3cuHnUylEMzZWZHHsLElyTvYdgIOggr+ylJnZ/yHtO0phzVV5J0w+5TwHP6geFZTvrMbtnaGfLIkuYK7yO5wKnRBH37838cHyIashGbrTWUrgquideEYAQM1QIY9OVQmVapv1ZaZ721W593U6LowkBWA9dtdDBZ96S7sAXLFe9CEDEAZaTGcqbNzLqfww35oRKWc7Kgr2daB0orEqhWPSAcZmE1jhPK8soYpmxdGdCWmxO761D1mMyFSYeEAbSLiRZMKQGSqV6Kf8FYzEtCo6ugchXeM6jiNPTtAamWFnkEOJ2Ob8h5m+ryDK2fIFOqAtNQYdgPX8YgULJr1iZ7AnB5hUXllH98WSv23mLxoZB+c1Ab3vU8Pohfd8ztA8LszvDQ3WCT3AC3VYgilJaQCkYLjtsj+3btxqhuGbUpKFUm20FCeZ3oJTGBlP5zjPN61EZkb1nqmwQTm1fPcYJy+AsVb2RNi/43U3EauJ/QCPbSO8Z1E="
+    file: "${TRAVIS_TAG}-compiled.tar.gz"
+    on:
+      repo: Forumouth/gulp-scss
+      tags: true
+    skip_cleanup: true
+  - provider: npm
+    email: "hiroaki@hysoftware.net"
+    api_key:
+      secure: "hF8y7RcbQ61DDSqxxc4iy6rV8eMTzuIHk2s3nre8ooIaXQy5jnk5GuwRpY90eNKSOOp50efrzbugweaq/jH75APoX4SH+FPnwn0dXnOnZ06rjf4HLObo71mPn3Q0OBeX25P1wf3f8cXHC91QgFge9BEp1zErKOT7nf3JyrCEi2UvnJl3+1YCMFZXj3ZP9vZwcSwjJVvIHB8YsvbQbmme7EB6FRzExQVyZjJ6keLWQxf3pNBs9y1/D+LLQkn6j+ei3MY1aKJFQODrgy4j6bMfOAwow26jP2yMncRXx1QyMC09FKGkoJJZOkLwRdkXnfmaHE31aTzlxx0RLKWWiORxrinRy+IxgVrtr9gxwsAMg5nPcDU+RrM5lbpFqyVVQmLzef/Ol6fn2RkG8y9SpJDig52xC05Rysw14fQ6GaIkQFtN8h57bS0kQxUKaCQsBqgcl0oXg6/I3iynTKnLeSztLaK9fAtRjhwztUp/33EgchPu0RrXGkuj6Skz2z1RD5BlS1pgGJ26g5T9OxHgmpBzzKdI5rZSLHWLBOVN4mDyqSTAKDyBuD0nPlKnQNOWAiu/6M4IXNB6Zms1LIxCVuH10RkMTokBcnb+MGLd305NPkxqw6eajG/7NIUtsz71b+eh2b0nF6jeygelCYopaJwGl2NtKARik/GAiy1/uRVH8sU="
