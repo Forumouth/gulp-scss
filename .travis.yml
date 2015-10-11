@@ -1,15 +1,16 @@
 language: node_js
+
 node_js:
-  - "0.12"
-  - "0.11"
-  - "0.10"
-  - "iojs"
+  - '0.12'
+  - '0.11'
+  - '0.10'
+  - iojs
 
 before_install:
-  - "gem install bundler"
+  - gem install bundler
 
 before_script:
-  - "bundle install --path=./vendor/bundle"
+  - bundle install --path=./vendor/bundle
 
 before_deploy:
   - npm run compile
@@ -23,17 +24,15 @@ before_deploy:
 deploy:
   - provider: releases
     api_key:
-      secure: "KFhQYGDRtYk77IkXfjoX4s3+CMpex5ecG/8icwQAtY+jHSET3Hu1tEJLiE8kPUrWYqDbPPgrSlrnUCFtq6BCWpt6miuOQJAwXsIpb3cRXmqbnxAdyLBPbj5uxhuzBUxF99YliM/hS3Lr+ts3hAD+JLwzbl3tztLb3NHzSu7tMr4ElY2YtB8rZ29oNKuZd4c6jCvZ70Twi1VLj5wStgvN5MDuaF7B2nrxxPj4ry+5rUCv1+JeG+iekWSQO1GbmlC/q/X3cspNBBSmkvh9yzcpT1AMhSj6xtBYIrRMWPcMGCu3GGW50bNCM+Z9vn6aMKUK9ZrEXB/m+TCR2hfePuGvnkjekzb4RCUw9LumJf700tNTkZfTSmcQgP5VKau5/ytI+OE4aBFq2STlAMGupId1vIFdD2kJKBwkeMAubiDIWAm+Y8lwqNDw2E1eUuIg6fPMBuuI2DRF/v7pCB28SKf21ld31z97mwO1DLn8wc3T6bXmg3pqL1pNzgv+FC8gdT6DbbZWpYq2Een4Ny/DG7ZESzXFi+bGxKhKCzdSuLMGRpKcC9KPh7+XFO5BqW7Njzt2VAE7TeVZ4QoJajON3j3MDaBtfXMfmiTJM3JTpN7Si6Wopm+xe9G2S6Vg/D85Lxg4sg2I5I/RbXEdr97DdKTuB3YgA9YxsPSiPLNIMoX1gpw="
+      secure: FEe/rQPF16pAR6nwzMPPOcbZB5ezyyKQLbKr+sO7m8y0u0+IL16a4/qAMWQPG5gxqxr16QCylDplQCEXuEP8olBzx122/yRPkohEPGiZuem0LPnzep8zSPBsjAXGqNSDPBhqeXQ+z0/9XW+ChskDmt6sElYyPWm6yvQ31n4lyh6NlcrfIE3PWMOvP1g4ReoV3635Qsi77g5ijQFyshp+iyOckRiQsHcemlf41wrQGnbRznJ815UQwyYtVla44RFrKoiImRJxsEUA5SQF7zIxqyt6M+pdLRC9F8sj/oeQ2PoVBe7/z2oJs12H/0+RCHBqIw4OsVibk7rqpnCL394aJrW84hvFJBIbU5z1+h4uvusZ45dIh6UPXsWgO/i6uSzg1UP7uVkhi7j0JAm1fW+F3u8RbwbWuacPwQ8dpG/qw+eSnI6CYaWT86M1/xgwbNMyD3CY/azrlwIArtMq268dcPM9ggcCubWDYGDdIJb4RPCSoMSkXroO3RYX2SXljefv518l8oc/BKZC7CuocLrEJue/xKhbUR6E1rtFbkKg1xkJWPMuwLfI78kgvRCxz1z58UqN2q94DHAQkmd3qGByAOMWHLpaNLil2C0kA1fqRBSqHs+SPmPJPCASIZd04u6in1yRHo+Mn5ZCvtXV29PJEPxjUiY4T9N+iNkoeNPIjzY=
     file: "${TRAVIS_TAG}-compiled.tar.gz"
-    skip_cleanup: true
     on:
-      repo: Forumouth/gulp-scss
       tags: true
+      repo: Forumouth/gulp-scss
   - provider: npm
-    email: "hiroaki@hysoftware.net"
-    skip_cleanup: true
-    on:
-      repo: Forumouth/gulp-scss
-      tags: true
+    email: hiroaki@hysoftware.net
     api_key:
-      secure: "hF8y7RcbQ61DDSqxxc4iy6rV8eMTzuIHk2s3nre8ooIaXQy5jnk5GuwRpY90eNKSOOp50efrzbugweaq/jH75APoX4SH+FPnwn0dXnOnZ06rjf4HLObo71mPn3Q0OBeX25P1wf3f8cXHC91QgFge9BEp1zErKOT7nf3JyrCEi2UvnJl3+1YCMFZXj3ZP9vZwcSwjJVvIHB8YsvbQbmme7EB6FRzExQVyZjJ6keLWQxf3pNBs9y1/D+LLQkn6j+ei3MY1aKJFQODrgy4j6bMfOAwow26jP2yMncRXx1QyMC09FKGkoJJZOkLwRdkXnfmaHE31aTzlxx0RLKWWiORxrinRy+IxgVrtr9gxwsAMg5nPcDU+RrM5lbpFqyVVQmLzef/Ol6fn2RkG8y9SpJDig52xC05Rysw14fQ6GaIkQFtN8h57bS0kQxUKaCQsBqgcl0oXg6/I3iynTKnLeSztLaK9fAtRjhwztUp/33EgchPu0RrXGkuj6Skz2z1RD5BlS1pgGJ26g5T9OxHgmpBzzKdI5rZSLHWLBOVN4mDyqSTAKDyBuD0nPlKnQNOWAiu/6M4IXNB6Zms1LIxCVuH10RkMTokBcnb+MGLd305NPkxqw6eajG/7NIUtsz71b+eh2b0nF6jeygelCYopaJwGl2NtKARik/GAiy1/uRVH8sU="
+      secure: fVD4NLkflhrDNioyNr8vfrgjY27DJGwJGWTA8kh9Env/4SO5s0CMI5EJDSI7GpkByn/VCmLyOHxuTB1NPvMwRD8O1Xu19bGoT/cbxZ9fC6Z1AvJBnF1i66FYNQbwgz7qwHeDvKki1gKptyXN9uUsWGi+Tt8TuKKHF1D4Wdnp5bm4qldoDNCsMvr+k4+o3E0xypC1Nl6YJnhOrJW+QTHp+Ko/D3mYywRz6Ji4V4Qd31k10+6+O1OFiCouwPUABbugA3FwLgxYfT5MTNnW+7R1SNX+4W8hyIJS2c+6zZd/o5CyBmlEbk8QAgnC2Hcgl1qApBQ+/EcKJ93/eZ1gGZFU9GTLGEOdTixDh8mOeksQpmO1CRUB3sTh8aghzjtF+7Zt287S8j/I3swMmcqOZVxNCPRA1gGHz7hGBqeG4QOPFzZhKa5rih5wGHkkR0KPLsvkRrqXvTougR/OPBkX6NBSrT5KnWVXEbXIWtrrxJv5qkus28ZaIckGFftFpIynBC78iyxZIYS4JYlljjYzPSjVl2HqgZfR+BhMbGcOOqm8Y2D8Bxgjncr1s0rwtR3oWxfpvjxbve3azciNoR6gOO+9YGbvtnsRSn8MENbhJuJx8kUONkoRz6xTgjy2sqaACB7WKRBCa6wph6wej//Zu08w6jMRzeyPYr7l00XGGRwYNKs=
+    on:
+      tags: true
+      repo: Forumouth/gulp-scss
