@@ -13,7 +13,7 @@ before_script:
 
 before_deploy:
   - npm run compile
-  - sed -i -e "/\/lib\//D" .gitignore
+  - sed -i -e "/lib\//D" .gitignore
   - git config --global user.email "test@example.com"
   - git config --global user.name "Mr. Travis CI"
   - git add .
