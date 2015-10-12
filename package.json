@@ -1,6 +1,6 @@
 {
   "name": "gulp-scss",
-  "version": "1.3.10",
+  "version": "1.3.11",
   "description": "Gulp plugin for sass stylesheet compiler by standard approach",
   "main": "lib/scss.js",
   "scripts": {
