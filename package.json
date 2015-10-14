@@ -16,7 +16,7 @@
     "gulp-scss",
     "gulp-sass"
   ],
-  "author": "Hiroaki Yamamoto <admin@hysoftware.net>",
+  "author": "Hiroaki Yamamoto <hiroaki@hysoftware.net>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/forumouth/gulp-scss/issues"
