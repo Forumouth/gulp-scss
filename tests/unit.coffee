@@ -38,7 +38,7 @@ describe "SCSS unit test", ->
     objectToInject =
       "exec": sinon.stub().returns "on": (event, callback) ->
         if event is "close"
-          callback()
+          callback 0
       "fs":
         "createWriteStream": sinon.stub().returns(
           "on": (event, callback) ->

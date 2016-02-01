@@ -52,7 +52,11 @@ compile = inject [
 
             proc = exec command.join " "
             proc.on "error", defer.reject
-            proc.on "close", defer.resolve
+            proc.on "close", (code) ->
+              if code is 0
+                defer.resolve()
+              else
+                defer.reject "The command exited with code:#{code}"
             return defer.promise
         ).then(
           ->
@@ -85,7 +89,7 @@ compile = inject [
           (e) ->
             error = new gutil.PluginError(
               "gulp-scss",
-              "Compilation failed.: #{e}\nStack Trace:\n#{e.stack}"
+              "Compilation failed.: #{e}\n\nStack Trace:\n#{e.stack}"
             )
             compilerPromise.reject error
             cb error
