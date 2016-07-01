@@ -92,7 +92,7 @@ describe "SCSS unit test", ->
                   path.relative(file.cwd, file.base),
                   "source.css"
                 )
-              ], ("stdio": "inherit")
+              ], ("stdio": "inherit", "shell": true)
             ).is.true
             done()
         ).catch done
@@ -126,7 +126,7 @@ describe "SCSS unit test", ->
                   path.relative(file.cwd, file.base),
                   "source.css"
                 )
-              ], ("stdio": "inherit")
+              ], ("stdio": "inherit", "shell": true)
             ).is.true
         ).done (-> done()), done
 
@@ -171,7 +171,7 @@ describe "SCSS unit test", ->
                       path.relative(file.cwd, file.base),
                       "source.css"
                     )
-                  ], ("stdio": "inherit")).is.true
+                  ], ("stdio": "inherit", "shell": true)).is.true
               ).done (-> done()), done
 
   describe "Without any options", ->
@@ -192,7 +192,7 @@ describe "SCSS unit test", ->
                 path.relative(file.cwd, file.base),
                 "source.css"
               )
-            ], ("stdio": "inherit")
+            ], ("stdio": "inherit", "shell": true)
           ).is.ok
       ).done (-> done()), done
 

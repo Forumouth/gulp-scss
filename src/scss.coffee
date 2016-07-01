@@ -48,7 +48,10 @@ compile = inject [
               ).replace /\ /g, "\\ "
             )
 
-            proc = exec command.splice(0, 1)[0], command, ("stdio": "inherit")
+            proc = exec command.splice(0, 1)[0], command, (
+              "stdio": "inherit"
+              "shell": true
+            )
             proc.on "error", defer.reject
             proc.on "close", (code) ->
               if code is 0
