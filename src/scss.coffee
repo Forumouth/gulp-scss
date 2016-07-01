@@ -20,7 +20,7 @@ compile = inject [
           return cb null, file
         options =
           "bundleExec": false
-          "sourcemap": "auto"
+          "sourcemap": "inline"
           "tmpPath": ".gulp-scss-cache"
         options = extend options, opts
         passedArgs = dargs options, (
@@ -35,13 +35,32 @@ compile = inject [
         q.nfcall(mkdirp, tmpDir).then(
           ->
             defer = q.defer()
+            fileDestination = file.path.replace /\ /g, "\\ "
+            if file.contents
+              fileDestination = path.join(
+                tmpDir, path.basename(file.relative)
+              ).replace /\ /g, "\\ "
+              stream = fs.createWriteStream fileDestination
+              stream.on "finish", -> defer.resolve(fileDestination)
+              stream.on "error", defer.reject
+              if file.contents.pipe
+                file.contents.pipe stream
+              else
+                stream.write file.contents
+              stream.end()
+            else
+              defer.resolve fileDestination
+            defer.promise
+        ).then(
+          (filePath) ->
             command = []
+            defer = q.defer()
             if options.bundleExec
               command = command.concat "bundle", "exec"
             command.push "scss"
             command = command.concat(
-              passedArgs
-              file.path.replace /\ /g, "\\ "
+              passedArgs,
+              filePath,
               path.join(
                 tmpDir,
                 gutil.replaceExtension(path.basename(file.relative), ".css")
@@ -71,12 +90,13 @@ compile = inject [
             sourcemap = mapConverter.fromMapFileSource contents, tmpDir
             if sourcemap
               sourcemap = sourcemap.sourcemap
-              if options.sourcemap is "auto"
-                sourcemap.sources = sourcemap.sources.map (file) ->
-                  path.relative(
-                    process.cwd(),
-                    path.resolve tmpDir, file
-                  )
+              if options.sourcemap isnt "none"
+                sourcemap.sources = sourcemap.sources.map (srcPath) ->
+                  baseDir = if file.contents
+                    path.join file.cwd, options.tmpPath
+                  else
+                    process.cwd()
+                  path.relative baseDir, path.resolve(tmpDir, srcPath)
               applySourceMap file, sourcemap
             file.contents = new Buffer(
               mapConverter.removeMapFileComments(contents).trim()

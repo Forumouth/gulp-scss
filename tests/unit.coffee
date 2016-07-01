@@ -44,6 +44,8 @@ describe "SCSS unit test", ->
           "on": (event, callback) ->
             if event is "finish"
               callback()
+          "write": ->
+          "end": ->
         )
         "readFile": (path, options, cb) ->
           if typeof options is "function"
@@ -84,8 +86,13 @@ describe "SCSS unit test", ->
               objectToInject.exec.calledWithExactly "bundle", [
                 "exec"
                 "scss"
-                "--sourcemap=auto"
-                gutil.replaceExtension file.path, ".scss"
+                "--sourcemap=inline"
+                path.join(
+                  file.cwd, ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  path.dirname(file.relative),
+                  path.basename(file.relative)
+                )
                 path.join(
                   file.cwd,
                   ".gulp-scss-cache",
@@ -118,8 +125,13 @@ describe "SCSS unit test", ->
           ->
             expect(
               objectToInject.exec.calledWithExactly "scss", [
-                "--sourcemap=auto"
-                gutil.replaceExtension file.path, ".scss"
+                "--sourcemap=inline"
+                path.join(
+                  file.cwd, ".gulp-scss-cache",
+                  path.relative(file.cwd, file.base),
+                  path.dirname(file.relative),
+                  path.basename(file.relative)
+                )
                 path.join(
                   file.cwd,
                   ".gulp-scss-cache",
@@ -148,7 +160,25 @@ describe "SCSS unit test", ->
             file.cwd,
             "test",
             path.relative(file.cwd, file.base)
-          )).is.ok
+          )).is.true
+        ).done (-> done()), done
+
+    describe "When the file has contents", ->
+      func_promise = undefined
+      beforeEach (done) ->
+        func_promise = func_scss()(file, undefined, (-> done()))
+
+      it "The file should be written in the cache dir.", (done) ->
+        func_promise.then(
+          -> expect(
+            objectToInject.fs.createWriteStream.calledWithExactly path.join(
+              file.cwd,
+              ".gulp-scss-cache",
+              path.relative(file.cwd, file.base),
+              path.dirname(file.relative),
+              path.basename(file.relative)
+            )
+          ).is.true
         ).done (-> done()), done
 
     describe "When sourcemap has special options", ->
@@ -164,7 +194,12 @@ describe "SCSS unit test", ->
               func_promise.then(
                 -> expect(objectToInject.exec.calledWithExactly "scss", [
                     "--sourcemap=#{smvalue}"
-                    gutil.replaceExtension file.path, ".scss"
+                    path.join(
+                      file.cwd, ".gulp-scss-cache",
+                      path.relative(file.cwd, file.base),
+                      path.dirname(file.relative),
+                      path.basename(file.relative)
+                    )
                     path.join(
                       file.cwd,
                       ".gulp-scss-cache",
@@ -184,8 +219,13 @@ describe "SCSS unit test", ->
         ->
           expect(
             objectToInject.exec.calledWithExactly "scss", [
-              "--sourcemap=auto"
-              gutil.replaceExtension file.path, ".scss"
+              "--sourcemap=inline"
+              path.join(
+                file.cwd, ".gulp-scss-cache",
+                path.relative(file.cwd, file.base),
+                path.dirname(file.relative),
+                path.basename(file.relative)
+              )
               path.join(
                 file.cwd,
                 ".gulp-scss-cache",
@@ -193,7 +233,7 @@ describe "SCSS unit test", ->
                 "source.css"
               )
             ], ("stdio": "inherit")
-          ).is.ok
+          ).is.true
       ).done (-> done()), done
 
     it "Path should have css extension", ->
