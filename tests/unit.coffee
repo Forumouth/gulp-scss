@@ -2,7 +2,7 @@ expect = require("chai").expect
 sinon = require "sinon"
 through2 = require "through2"
 path = require "path"
-deepcopy = require "deepcopy"
+extend = require "extend"
 gutil = require "gulp-util"
 
 describe "SCSS unit test", ->
@@ -24,7 +24,7 @@ describe "SCSS unit test", ->
     cb = sinon.spy()
 
     file =
-      "clone": sinon.stub().returns deepcopy file
+      "clone": sinon.stub().returns extend true, file
       "isNull": sinon.stub().returns false
       "isBuffer": sinon.stub().returns true
       "isStream": sinon.stub().returns false
@@ -81,8 +81,7 @@ describe "SCSS unit test", ->
         func_promise.then(
           ->
             expect(
-              objectToInject.exec.calledWithExactly [
-                "bundle"
+              objectToInject.exec.calledWithExactly "bundle", [
                 "exec"
                 "scss"
                 "--sourcemap=auto"
@@ -93,8 +92,8 @@ describe "SCSS unit test", ->
                   path.relative(file.cwd, file.base),
                   "source.css"
                 )
-              ].join " "
-            ).is.ok
+              ], ("stdio": "inherit")
+            ).is.true
             done()
         ).catch done
 
@@ -118,8 +117,7 @@ describe "SCSS unit test", ->
         func_promise.then(
           ->
             expect(
-              objectToInject.exec.calledWithExactly [
-                "scss"
+              objectToInject.exec.calledWithExactly "scss", [
                 "--sourcemap=auto"
                 gutil.replaceExtension file.path, ".scss"
                 path.join(
@@ -128,8 +126,8 @@ describe "SCSS unit test", ->
                   path.relative(file.cwd, file.base),
                   "source.css"
                 )
-              ].join " "
-            ).is.ok
+              ], ("stdio": "inherit")
+            ).is.true
         ).done (-> done()), done
 
       it "Path should have css extension", ->
@@ -164,8 +162,7 @@ describe "SCSS unit test", ->
               )(file, undefined, (-> done()))
             it "exec function should be called with sourcemap", (done) ->
               func_promise.then(
-                -> expect(objectToInject.exec.calledWithExactly([
-                    "scss"
+                -> expect(objectToInject.exec.calledWithExactly "scss", [
                     "--sourcemap=#{smvalue}"
                     gutil.replaceExtension file.path, ".scss"
                     path.join(
@@ -174,7 +171,7 @@ describe "SCSS unit test", ->
                       path.relative(file.cwd, file.base),
                       "source.css"
                     )
-                  ].join " ")).is.ok
+                  ], ("stdio": "inherit")).is.true
               ).done (-> done()), done
 
   describe "Without any options", ->
@@ -186,8 +183,7 @@ describe "SCSS unit test", ->
       func_promise.then(
         ->
           expect(
-            objectToInject.exec.calledWithExactly [
-              "scss"
+            objectToInject.exec.calledWithExactly "scss", [
               "--sourcemap=auto"
               gutil.replaceExtension file.path, ".scss"
               path.join(
@@ -196,7 +192,7 @@ describe "SCSS unit test", ->
                 path.relative(file.cwd, file.base),
                 "source.css"
               )
-            ].join " "
+            ], ("stdio": "inherit")
           ).is.ok
       ).done (-> done()), done
 

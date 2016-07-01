@@ -2,7 +2,7 @@ inject = require("node-kissdi").inject
 dargs = require "dargs"
 through = require "through2"
 gutil = require "gulp-util"
-merge = require "merge"
+extend = require "extend"
 path = require "path"
 q = require "q"
 mapConverter = require "convert-source-map"
@@ -22,7 +22,7 @@ compile = inject [
           "bundleExec": false
           "sourcemap": "auto"
           "tmpPath": ".gulp-scss-cache"
-        merge(options, opts)
+        options = extend options, opts
         passedArgs = dargs options, (
           "excludes": ["bundleExec", "tmpPath"]
         )
@@ -43,14 +43,14 @@ compile = inject [
             command.push "scss"
             command = command.concat(
               passedArgs
-              file.path
+              file.path.replace /\ /g, "\\ "
               path.join(
                 tmpDir,
                 gutil.replaceExtension(path.basename(file.relative), ".css")
-              )
+              ).replace /\ /g, "\\ "
             )
 
-            proc = exec command.join " "
+            proc = exec command.splice(0, 1)[0], command, ("stdio": "inherit")
             proc.on "error", defer.reject
             proc.on "close", (code) ->
               if code is 0
@@ -97,7 +97,7 @@ compile = inject [
         )
         return compilerPromise.promise
 ], (
-  "exec": require("child_process").exec
+  "exec": require("child_process").spawn
   "mkdirp": require "mkdirp"
   "fs": require("fs")
 )
