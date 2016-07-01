@@ -5,6 +5,23 @@ node_js:
   - '5'
   - 'iojs'
 
+cache:
+  apt: true
+  directories:
+    - "${HOME}/.npm"
+    - "node_modules"
+
+env:
+  global:
+    - CXX=g++-4.8
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
 before_install:
   - gem install bundler
 
