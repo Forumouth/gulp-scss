@@ -32,8 +32,6 @@ compile = inject [
           path.relative(file.cwd, file.base),
           path.dirname(file.relative)
         )
-
-        compilerPromise = q.defer()
         q.nfcall(mkdirp, tmpDir).then(
           ->
             defer = q.defer()
@@ -84,18 +82,15 @@ compile = inject [
               mapConverter.removeMapFileComments(contents).trim()
             )
             cb null, file
-            compilerPromise.resolve()
         ).catch(
           (e) ->
             error = new gutil.PluginError(
               "gulp-scss",
               "Compilation failed.: #{e}\n\nStack Trace:\n#{e.stack}"
             )
-            compilerPromise.reject error
             cb error
             throw error
         )
-        return compilerPromise.promise
 ], (
   "exec": require("child_process").spawn
   "mkdirp": require "mkdirp"
